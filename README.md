@@ -9,7 +9,7 @@ Get started by cloning this repository:
 # General Workflow
 
 Only push changes to directly to main branch if it's a trivial change, or if it makes sense to push it without needing review.
-Otherwise, the general workflow is summarized by this image
+Otherwise, the general workflow is summarized by this [image](https://user-images.githubusercontent.com/6351798/48032310-63842400-e114-11e8-8db0-06dc0504dcb5.png)
 
 Every time you start working make sure your local repo is up to date by calling
 
