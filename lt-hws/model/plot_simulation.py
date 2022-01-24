@@ -7,15 +7,16 @@ h_plane_file [str  ]: The path to the H-Plane file
 dx           [float]: A float representing the delta x value used during simulation. (idx from si3d_inp.txt)
 """
 
-# Globals
+# Global
+import os
 h_plane_file = "./SampleModel/plane_2"
 dx = 800
-
+print("Running from", os.getcwd())
+print("Searching for h_plane file in", h_plane_file)
 
 from si3dOutputs.HPlane_Si3DtoPython import HPlane_Si3dToPython
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider
-import numpy as np
 
 
 class DynamicPlot:
