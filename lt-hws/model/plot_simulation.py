@@ -9,12 +9,12 @@ dx           [float]: A float representing the delta x value used during simulat
 
 # Global
 import os
-h_plane_file = "./SampleModel/plane_2"
+h_plane_file = "./lt-hws/model/SampleModel/plane_2"
 dx = 800
 print("Running from", os.getcwd())
 print("Searching for h_plane file in", h_plane_file)
 
-from si3dOutputs.HPlane_Si3DtoPython import HPlane_Si3dToPython
+from postprocessing.HPlane_Si3DtoPython import HPlane_Si3dToPython
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider
 

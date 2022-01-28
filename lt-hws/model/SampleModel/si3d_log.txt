@@ -1,1 +1,1 @@
- time=   23.5000 hours    n=     0
+ time=    0.0139 hours    n=     0

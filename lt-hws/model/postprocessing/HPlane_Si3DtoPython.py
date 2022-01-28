@@ -15,6 +15,10 @@
 # Author: Sergio Valbuena
 # Date: 05-12-2020
 
+""" Changed this code to only return data of interest
+Author: Sam Maksimovich
+"""
+
 # Library Import
 import os
 import numpy as np
@@ -47,8 +51,6 @@ def HPlane_Si3dToPython(h_plane_file, dx):
     v = np.empty((ipoints,n_frames+1))
     w = np.empty((ipoints,n_frames+1))
     T = np.empty((ipoints,n_frames+1))
-    Az = np.empty((ipoints,n_frames+1))
-    l = np.empty((ipoints,n_frames+1))
 
     for frame in range(0,n_frames+1):
         dum5 = np.fromfile(fid, count = 1, dtype = np.int32)
@@ -69,8 +71,6 @@ def HPlane_Si3dToPython(h_plane_file, dx):
                 v[:,frame] = out_array[3:len(out_array)-4:8]
                 w[:,frame] = out_array[4:len(out_array)-3:8]
                 T[:,frame] = out_array[5:len(out_array)-2:8]
-                Az[:,frame] = out_array[6:len(out_array)-1:8]
-                l[:,frame] = out_array[7:len(out_array):8]
             else:
                 # ... GEOMETRY only in first step
                 out_array = np.fromfile(fid,count = 6*ipoints, dtype = np.float32)
@@ -78,8 +78,6 @@ def HPlane_Si3dToPython(h_plane_file, dx):
                 v[:,frame] = out_array[1:len(out_array)-4:6]
                 w[:,frame] = out_array[2:len(out_array)-3:6]
                 T[:,frame] = out_array[3:len(out_array)-2:6]
-                Az[:,frame] = out_array[4:len(out_array)-1:6]
-                l[:,frame] = out_array[5:len(out_array):6]
             dum6 = np.fromfile(fid,count = 1, dtype = np.int32)
             del out_array
         else:
@@ -92,10 +90,8 @@ def HPlane_Si3dToPython(h_plane_file, dx):
             v = v[:,0:n_frames+1]
             w = w[:,0:n_frames+1]
             T = T[:,0:n_frames+1]
-            Az = Az[:,0:n_frames+1]
-            l = l[:,0:n_frames+1]
             break
-    # print('No of Frames = ',n_frames)
+
     years = year.astype(int)
     months = month.astype(int)
     days = day.astype(int)
@@ -141,10 +137,6 @@ def HPlane_Si3dToPython(h_plane_file, dx):
         w_vect = w[:,frame]             # [m/s]
         # # ......... Scalar field
         T_vect = T[:,frame]             # [C]
-        # # ......... TKE field
-        Az_vect = Az[:,frame]
-        # # ......... TKE field
-        l_vect = l[:,frame]             # [m]
 
         # ------- ARRANGE RECORDS IN SPATIALLY MEANINGFUL DOMAIN
         for j in range(int(np.min(y))-2,int(np.max(y)-1)):
@@ -154,23 +146,15 @@ def HPlane_Si3dToPython(h_plane_file, dx):
             vg[j,x[dum]-2,frame] = v_vect[dum]
             wg[j,x[dum]-2,frame] = w_vect[dum]
             Tg[j,x[dum]-2,frame] = T_vect[dum]
-            Azg[j,x[dum]-2,frame] = Az_vect[dum]
-            lg[j,x[dum]-2,frame] = l_vect[dum]
             del dum
 
     del dum1, dum2, dum3, dum4, dum5, dum6
 
     output = {}
-    output['x'] = xg
-    output['y'] = yg
     output['u'] = ug
     output['v'] = vg
     output['w'] = wg
     output['T'] = Tg
-    output['Az'] = Azg
-    output['l'] = lg
-    output['Time'] = Time
-    output['n_frames'] = n_frames
 
     fid.close()
 
