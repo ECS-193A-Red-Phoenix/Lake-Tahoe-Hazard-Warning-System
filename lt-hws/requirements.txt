@@ -1,3 +1,6 @@
 numpy
 matplotlib
 pandas
+requests
+json
+dateutil
