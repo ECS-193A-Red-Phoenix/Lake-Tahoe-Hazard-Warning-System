@@ -3,9 +3,22 @@ data from the National Weather Service.
 
 Suggested Usage:
 
-from dataretrieval.nws import get_model_nws_data
-
-data = get_model_nws_data()
+>>> from dataretrieval.nws import get_model_nws_data
+>>> data = get_model_nws_data() # Returns pandas DataFrame object
+>>> data
+>>>
+                         time  windDirection  windSpeed  temperature  skyCover  relativeHumidity
+0   2022-01-28 19:00:00+00:00            230      3.704    -0.555556        22                51
+1   2022-01-28 20:00:00+00:00            220      7.408     1.111111        14                45
+2   2022-01-28 21:00:00+00:00            220      7.408     1.666667         5                47
+3   2022-01-28 22:00:00+00:00            220      9.260     1.666667         5                48
+4   2022-01-28 23:00:00+00:00            210      5.556     3.333333         4                44
+..                        ...            ...        ...          ...       ...               ...
+169 2022-02-04 20:00:00+00:00            260     18.520    -4.444444        32                54
+170 2022-02-04 21:00:00+00:00            260     18.520    -3.888889        34                55
+171 2022-02-04 22:00:00+00:00            270     16.668    -3.888889        34                55
+172 2022-02-04 23:00:00+00:00            300     14.816    -5.000000        35                59
+173 2022-02-05 00:00:00+00:00            310     11.112    -6.111111        35                62
 """
 
 from collections import defaultdict
@@ -94,13 +107,15 @@ def get_model_nws_data():
 
     Returns:
         pandas.DataFrame - tabulated NWS data, example below:
-    ##############################################################################################
-                           time  windDirection  windSpeed  temperature  skyCover  relativeHumidity
-    0 2022-01-28 19:00:00+00:00            230      3.704    -0.555556        22                51
-    1 2022-01-28 20:00:00+00:00            220      7.408     1.111111        14                45   
-    2 2022-01-28 21:00:00+00:00            220      7.408     1.666667         5                47   
-    3 2022-01-28 22:00:00+00:00            220      9.260     1.666667         5                48   
-    4 2022-01-28 23:00:00+00:00            210      5.556     3.333333         4                44   
+    ################################################################################################
+                           time    windDirection  windSpeed  temperature  skyCover  relativeHumidity
+    0 2022-01-28 19:00:00+00:00              230      3.704    -0.555556        22                51
+    1 2022-01-28 20:00:00+00:00              220      7.408     1.111111        14                45   
+    2 2022-01-28 21:00:00+00:00              220      7.408     1.666667         5                47   
+    3 2022-01-28 22:00:00+00:00              220      9.260     1.666667         5                48   
+    4 2022-01-28 23:00:00+00:00              210      5.556     3.333333         4                44   
+                                                                                                    
+    Units:      datetime object   degrees (angle)      km/h      Celcius   percent           percent
     """
     data = get_nws_data()
     labels = ['windDirection', 'windSpeed', 'temperature', 'skyCover', 'relativeHumidity']
@@ -124,4 +139,4 @@ def get_model_nws_data():
         [[time] + values for time, values in model_data.items()],
         columns=['time'] + labels
     )
-    
+
