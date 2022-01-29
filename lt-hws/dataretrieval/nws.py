@@ -3,7 +3,7 @@ data from the National Weather Service.
 
 Suggested Usage:
 
-from data-retrieval.nws import get_model_nws_data
+from dataretrieval.nws import get_model_nws_data
 
 data = get_model_nws_data()
 """
