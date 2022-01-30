@@ -1,0 +1,3 @@
+[submodule "model/psi3d"]
+	path = model/psi3d
+	url = https://github.com/SI3DL/psi3d.git
