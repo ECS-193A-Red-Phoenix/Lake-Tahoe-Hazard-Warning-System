@@ -135,8 +135,18 @@ def get_model_nws_data():
             for hour in range(0, duration):
                 model_data[time + timedelta(hours=hour)][label_idx] = value
 
-    return pd.DataFrame(
+    df = pd.DataFrame(
         [[time] + values for time, values in model_data.items()],
         columns=['time'] + labels
     )
+
+    # Trim rows with nan
+    rows_with_nan = df.isnull().any(axis=1)
+    rows_with_nan = [idx for idx, is_nan in enumerate(rows_with_nan) if is_nan]
+    df.drop(axis=0, index=rows_with_nan, inplace=True)
+
+    # Add Longwave as a function of AirTemp and Cloud Cover 
+    # Hlwin = 0.937e-5 * 0.97 * 5.67e-8 * ((AirT + 273.16)**6) * (1 + 0.17*Cl)
+    df['longwave'] = 0.937e-5 * 0.97 * 5.67e-8 * ((df['temperature'] + 273.16)**6) * (1 + 0.17*df['skyCover'])
+    return df
 
