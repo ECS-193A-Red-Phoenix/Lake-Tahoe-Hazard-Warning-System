@@ -147,6 +147,6 @@ def get_model_nws_data():
 
     # Add Longwave as a function of AirTemp and Cloud Cover 
     # Hlwin = 0.937e-5 * 0.97 * 5.67e-8 * ((AirT + 273.16)**6) * (1 + 0.17*Cl)
-    df['longwave'] = 0.937e-5 * 0.97 * 5.67e-8 * ((df['temperature'] + 273.16)**6) * (1 + 0.17*df['skyCover'])
+    df['longwave'] = 0.937e-5 * 0.97 * 5.67e-8 * ((df['temperature'] + 273.16)**6) * (1 + 0.17*(df['skyCover'] / 100))
     return df
 
