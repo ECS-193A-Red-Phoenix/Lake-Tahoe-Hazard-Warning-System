@@ -115,7 +115,7 @@ def get_model_nws_data():
     3 2022-01-28 22:00:00+00:00              220      9.260     1.666667         5                48   
     4 2022-01-28 23:00:00+00:00              210      5.556     3.333333         4                44   
                                                                                                     
-    Units:      datetime object   degrees (angle)      km/h      Celcius   percent           percent
+    Units:     pandas Timestamp   degrees (angle)      km/h      Celcius   percent           percent
     """
     data = get_nws_data()
     labels = ['windDirection', 'windSpeed', 'temperature', 'skyCover', 'relativeHumidity']
@@ -148,5 +148,7 @@ def get_model_nws_data():
     # Add Longwave as a function of AirTemp and Cloud Cover 
     # Hlwin = 0.937e-5 * 0.97 * 5.67e-8 * ((AirT + 273.16)**6) * (1 + 0.17*Cl)
     df['longwave'] = 0.937e-5 * 0.97 * 5.67e-8 * ((df['temperature'] + 273.16)**6) * (1 + 0.17*(df['skyCover'] / 100))
+    
+    df.sort_values(by=['time'])
     return df
 
