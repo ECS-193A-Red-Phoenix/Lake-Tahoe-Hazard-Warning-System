@@ -118,13 +118,13 @@ def get_model_nws_data():
     Units:     pandas Timestamp   degrees (angle)      km/h      Celcius   percent           percent
     """
     data = get_nws_data()
-    labels = ['windDirection', 'windSpeed', 'temperature', 'skyCover', 'relativeHumidity']
+    features = ['windDirection', 'windSpeed', 'temperature', 'skyCover', 'relativeHumidity']
     
     # Create a dictionary (time (str)) -> List[temperature, ..., ]
-    model_data = defaultdict(lambda: [nan for i in range(len(labels))])
+    model_data = defaultdict(lambda: [nan for i in range(len(features))])
     
-    for label_idx, label_name in enumerate(labels):
-        for sample in data['properties'][label_name]['values']:
+    for f_idx, feature in enumerate(features):
+        for sample in data['properties'][feature]['values']:
             # The NWS gives us not dates, but intervals of time
             # I parse the interval of time, including its start and duration
             # I convert the start to the nearest hour and sample for every hour in the duration
@@ -133,11 +133,11 @@ def get_model_nws_data():
             time = round_to_nearest_hour(time)
 
             for hour in range(0, duration):
-                model_data[time + timedelta(hours=hour)][label_idx] = value
+                model_data[time + timedelta(hours=hour)][f_idx] = value
 
     df = pd.DataFrame(
         [[time] + values for time, values in model_data.items()],
-        columns=['time'] + labels
+        columns=['time'] + features
     )
 
     # Trim rows with nan
