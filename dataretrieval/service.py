@@ -1,4 +1,6 @@
-""" This file encapsulates all tasks of the data retrieval service
+""" This file encapsulates all tasks of the data retrieval service. If run 
+directly, this file will execute the retrieve task.
+
 List of Tasks:
 
 1. Retrieve
@@ -25,13 +27,14 @@ class DataRetrievalService:
         # Use csv file as database for now
         if os.path.isfile(self.CSV_FILE):
             self.db = pd.read_csv(self.CSV_FILE)
+            self.db['time'] = pd.to_datetime(self.db['time'])
         else:
             self.db = None
 
 
     def save(self):
         if self.db is not None:
-            self.db.to_csv(self.CSV_FILE)
+            self.db.to_csv(self.CSV_FILE, index=False)
 
 
     def retrieve(self):
@@ -49,3 +52,13 @@ class DataRetrievalService:
 
         self.save()
 
+
+if __name__ == "__main__":
+    drs = DataRetrievalService()
+    drs.retrieve()
+
+    import datetime
+    format_date = lambda date: datetime.datetime.strftime(date, "%Y-%m-%d %H:%M")
+    past = format_date(drs.db['time'][0])
+    future = format_date(drs.db['time'][len(drs.db) - 1])
+    print(f"[DataRetrievalService]: Fetched forecasts from {past} to {future}")
