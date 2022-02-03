@@ -27,6 +27,7 @@ from math import nan
 from dateutil import parser
 import requests
 import pandas as pd
+import numpy as np
 
 
 def parse_interval(interval):
@@ -82,7 +83,7 @@ def round_to_nearest_hour(date):
         return date.replace(hour=date.hour, minute=0, second=0)
 
 
-def get_nws_data():
+def get_nws_json():
     """
     Retrieves data from the nws api and returns a dictionary of that data
     """
@@ -106,24 +107,22 @@ def get_model_nws_data():
     required by the model 
 
     Returns:
-        pandas.DataFrame - tabulated NWS data, example below:
-    ################################################################################################
-                           time    windDirection  windSpeed  temperature  skyCover  relativeHumidity
-    0 2022-01-28 19:00:00+00:00              230      3.704    -0.555556        22                51
-    1 2022-01-28 20:00:00+00:00              220      7.408     1.111111        14                45   
-    2 2022-01-28 21:00:00+00:00              220      7.408     1.666667         5                47   
-    3 2022-01-28 22:00:00+00:00              220      9.260     1.666667         5                48   
-    4 2022-01-28 23:00:00+00:00              210      5.556     3.333333         4                44   
-                                                                                                    
+        pandas.DataFrame - tabulated model forecast inputs, example below:
+                               time  shortwave   air temp  atmospheric pressure   relative humidity    longwave     wind u     wind v  
+        0 2022-02-03 12:00:00+00:00        NaN -15.555556                   NaN                  49  158.532795  12.901979  15.765701     
+        1 2022-02-03 13:00:00+00:00        NaN -16.111111                   NaN                  50  154.217981  12.901979  15.765701   
+        2 2022-02-03 14:00:00+00:00        NaN -16.666667                   NaN                  53  152.228903  -1.839935 -16.566136   
+        3 2022-02-03 15:00:00+00:00        NaN -15.555556                   NaN                  48  154.436574  11.729072  14.332455   
+        4 2022-02-03 16:00:00+00:00        NaN -13.888889                   NaN                  44  166.650116  16.420700  20.065438                                                                            
+
     Units:     pandas Timestamp   degrees (angle)      km/h      Celcius   percent           percent
     """
-    data = get_nws_data()
-    features = ['windDirection', 'windSpeed', 'temperature', 'skyCover', 'relativeHumidity']
+    data = get_nws_json()
+
+    nws_features = ['windDirection', 'windSpeed', 'temperature', 'skyCover', 'relativeHumidity']
+    model_data = defaultdict(lambda: [nan] * len(nws_features))
     
-    # Create a dictionary (time (str)) -> List[temperature, ..., ]
-    model_data = defaultdict(lambda: [nan for i in range(len(features))])
-    
-    for f_idx, feature in enumerate(features):
+    for f_idx, feature in enumerate(nws_features):
         for sample in data['properties'][feature]['values']:
             # The NWS gives us not dates, but intervals of time
             # I parse the interval of time, including its start and duration
@@ -137,7 +136,7 @@ def get_model_nws_data():
 
     df = pd.DataFrame(
         [[time] + values for time, values in model_data.items()],
-        columns=['time'] + features
+        columns=['time'] + nws_features
     )
 
     # Trim rows with nan
@@ -145,10 +144,27 @@ def get_model_nws_data():
     rows_with_nan = [idx for idx, is_nan in enumerate(rows_with_nan) if is_nan]
     df.drop(axis=0, index=rows_with_nan, inplace=True)
 
+    # Create empty columns
+    df['shortwave'] = nan
+    df['atmospheric pressure'] = nan
+
+    # Rename NWS labels
+    df.rename(columns={"temperature" : "air temp", "relativeHumidity": "relative humidity"}, inplace=True)
+
+    # Decompose windDirection and windSpeed into vector
+    df['wind u'] = np.cos(90 - df['windDirection']) * df['windSpeed']
+    df['wind v'] = np.sin(90 - df['windDirection']) * df['windSpeed']
+    df.drop('windDirection', axis=1, inplace=True)
+    df.drop('windSpeed', axis=1, inplace=True)
+
     # Add Longwave as a function of AirTemp and Cloud Cover 
-    # Hlwin = 0.937e-5 * 0.97 * 5.67e-8 * ((AirT + 273.16)**6) * (1 + 0.17*Cl)
-    df['longwave'] = 0.937e-5 * 0.97 * 5.67e-8 * ((df['temperature'] + 273.16)**6) * (1 + 0.17*(df['skyCover'] / 100))
-    
+    df['longwave'] = 0.937e-5 * 0.97 * 5.67e-8 * ((df['air temp'] + 273.16)**6) * (1 + 0.17*(df['skyCover'] / 100))
+    df.drop('skyCover', axis=1, inplace=True)
+
+    # Reorder columns to be consistent with AWS dataframe
+    features = ["time", "shortwave", "air temp", "atmospheric pressure", "relative humidity", "longwave", "wind u", "wind v"]
+    df = df[features]
+
     df.sort_values(by=['time'])
     return df
 
