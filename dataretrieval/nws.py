@@ -5,20 +5,13 @@ Suggested Usage:
 
 >>> from dataretrieval.nws import get_model_nws_data
 >>> data = get_model_nws_data() # Returns pandas DataFrame object
->>> data
->>>
-                         time  windDirection  windSpeed  temperature  skyCover  relativeHumidity
-0   2022-01-28 19:00:00+00:00            230      3.704    -0.555556        22                51
-1   2022-01-28 20:00:00+00:00            220      7.408     1.111111        14                45
-2   2022-01-28 21:00:00+00:00            220      7.408     1.666667         5                47
-3   2022-01-28 22:00:00+00:00            220      9.260     1.666667         5                48
-4   2022-01-28 23:00:00+00:00            210      5.556     3.333333         4                44
-..                        ...            ...        ...          ...       ...               ...
-169 2022-02-04 20:00:00+00:00            260     18.520    -4.444444        32                54
-170 2022-02-04 21:00:00+00:00            260     18.520    -3.888889        34                55
-171 2022-02-04 22:00:00+00:00            270     16.668    -3.888889        34                55
-172 2022-02-04 23:00:00+00:00            300     14.816    -5.000000        35                59
-173 2022-02-05 00:00:00+00:00            310     11.112    -6.111111        35                62
+>>> data.head()
+                        time  shortwave   air temp  atmospheric pressure   relative humidity    longwave     wind u     wind v  
+0  2022-02-03 12:00:00+00:00        NaN -15.555556                   NaN                  49  158.532795  12.901979  15.765701     
+1  2022-02-03 13:00:00+00:00        NaN -16.111111                   NaN                  50  154.217981  12.901979  15.765701   
+2  2022-02-03 14:00:00+00:00        NaN -16.666667                   NaN                  53  152.228903  -1.839935 -16.566136   
+3  2022-02-03 15:00:00+00:00        NaN -15.555556                   NaN                  48  154.436574  11.729072  14.332455   
+4  2022-02-03 16:00:00+00:00        NaN -13.888889                   NaN                  44  166.650116  16.420700  20.065438
 """
 
 from collections import defaultdict
@@ -86,10 +79,13 @@ def round_to_nearest_hour(date):
 def get_nws_json():
     """
     Retrieves data from the nws api and returns a dictionary of that data
+
+    gx, gy are constants from the following api call for lake tahoe (39.0961,-120.0397)
+    https://api.weather.gov/points/{latitude},{longitude} 
     """
     base_url = "https://api.weather.gov/"
-    office = "TOP" 
-    gx, gy = 32, 86
+    office = "REV" 
+    gx, gy = 33, 87 # Lake Tahoe
 
     url = base_url + f"gridpoints/{office}/{gx},{gy}"
     headers = {
@@ -166,5 +162,5 @@ def get_model_nws_data():
     df = df[features]
 
     df.sort_values(by=['time'])
+    df.reset_index(inplace=True, drop=True)
     return df
-
