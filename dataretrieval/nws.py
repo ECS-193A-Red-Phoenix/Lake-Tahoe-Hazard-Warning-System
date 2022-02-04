@@ -111,9 +111,18 @@ def get_model_nws_data():
         3 2022-02-03 15:00:00+00:00        NaN -15.555556                   NaN                  48  154.436574  11.729072  14.332455   
         4 2022-02-03 16:00:00+00:00        NaN -13.888889                   NaN                  44  166.650116  16.420700  20.065438                                                                            
 
-    Units:     pandas Timestamp   degrees (angle)      km/h      Celcius   percent           percent
+    Units:         pandas Timestamp        wm2    Celcius                    Pa            fraction         wm2         ms         ms
     """
     data = get_nws_json()
+    features = ["time", "shortwave", "air temp", "atmospheric pressure", "relative humidity", "longwave", "wind u", "wind v"]
+
+    # Sometimes NWS API fails and gives us 'Unexpected Problem' as a response
+    for retry in range(5):
+        if 'properties' in data:
+            break
+        data = get_nws_json() # Retry 5 times
+    if 'properties' not in data:
+        return pd.DataFrame(columns=features) # Return empty DataFrame in case NWS is down
 
     nws_features = ['windDirection', 'windSpeed', 'temperature', 'skyCover', 'relativeHumidity']
     model_data = defaultdict(lambda: [nan] * len(nws_features))
@@ -140,16 +149,21 @@ def get_model_nws_data():
     rows_with_nan = [idx for idx, is_nan in enumerate(rows_with_nan) if is_nan]
     df.drop(axis=0, index=rows_with_nan, inplace=True)
 
-    # Create empty columns
-    df['shortwave'] = nan
-    df['atmospheric pressure'] = nan
+    # Temporary shortwave formula based on historical AWS data
+    hourize = lambda t: t.hour + t.minute / 60
+    f = lambda t: 5.1276e+02 * np.exp(-9.4720e-02 * (t - 1.1238e-01)**2)
+    g = lambda t: f(((hourize(t) + -10) % 24) - 10)
+    df['shortwave'] = [g(t_i) for t_i in df['time']]
+
+    # Based on historical pressure and confirmed by barometric pressure eq 
+    df['atmospheric pressure'] = 81600 # Pa
 
     # Rename NWS labels
     df.rename(columns={"temperature" : "air temp", "relativeHumidity": "relative humidity"}, inplace=True)
 
     # Decompose windDirection and windSpeed into vector
-    df['wind u'] = np.cos(90 - df['windDirection']) * df['windSpeed']
-    df['wind v'] = np.sin(90 - df['windDirection']) * df['windSpeed']
+    df['wind u'] = np.cos(np.radians(df['windDirection'])) * df['windSpeed']
+    df['wind v'] = np.sin(np.radians(df['windDirection'])) * df['windSpeed']
     df.drop('windDirection', axis=1, inplace=True)
     df.drop('windSpeed', axis=1, inplace=True)
 
@@ -158,7 +172,6 @@ def get_model_nws_data():
     df.drop('skyCover', axis=1, inplace=True)
 
     # Reorder columns to be consistent with AWS dataframe
-    features = ["time", "shortwave", "air temp", "atmospheric pressure", "relative humidity", "longwave", "wind u", "wind v"]
     df = df[features]
 
     df.sort_values(by=['time'])
