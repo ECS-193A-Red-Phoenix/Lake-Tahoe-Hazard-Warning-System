@@ -1,10 +1,12 @@
 """ The purpose of this file is to encapsulate an interface for gathering
-Lake Tahoe Station data from AWS.
+Lake Tahoe Station data from AWS. 
 
+Note: all timestamps are in UTC
 """
 
-from math import nan
+import math
 from collections import defaultdict
+from cv2 import magnitude
 import pandas as pd
 import datetime
 import requests
@@ -44,7 +46,7 @@ def get_uscg_json(start_date, id=1, end_date=None):
     }
 
     Args:
-        start_date (datetime.datetime): starting date of query
+        start_date (datetime.datetime): starting date of query in UTC
         id (int, optional): Station ID, Currently there is only 1 Station. Defaults to 1.
         end_date (datetime.datetime, optional): end date of query. Defaults to None (24 hour period).
     """
@@ -111,7 +113,7 @@ def get_near_shore_json(start_date, id=9, end_date=None):
     }
 
     Args:
-        start_date (datetime): starting date of query
+        start_date (datetime): starting date of query in UTC
         id (int, optional): Station ID in [1, 9]. Defaults to 9. 
         end_date (datetime, optional): end date of query. Defaults to None.
     """
@@ -135,18 +137,19 @@ def get_model_aws_data(start_date, end_date=None):
     the data that the model requires
 
     Args:
-        start_date (datetime): start date of the query
-        end_date (datetime, optional): end date of the query. Defaults to None.
+        start_date (datetime): start date of the query, in UTC
+        end_date (datetime, optional): end date of the query. Defaults to None, giving 24 hours after start_date
     Returns:
         pandas.DataFrame Object
     """
-    parse_date = lambda date: datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+    parse_date = lambda date: datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S") \
+                                               .replace(tzinfo=datetime.timezone.utc)
 
-    buoy_json = get_nasa_buoy_json(start_date)
-    uscg_json = get_uscg_json(start_date)
+    buoy_json = get_nasa_buoy_json(start_date, end_date=end_date)
+    uscg_json = get_uscg_json(start_date, end_date=end_date)
 
     features = ["shortwave", "air temp", "atmospheric pressure", "relative humidity", "longwave", "wind u", "wind v"]
-    data = defaultdict(lambda: [nan] * len(features))
+    data = defaultdict(lambda: [math.nan] * len(features))
 
     for data_sample in buoy_json:
         time = parse_date(data_sample['TmStamp'])
@@ -156,8 +159,10 @@ def get_model_aws_data(start_date, end_date=None):
         wind_dir2 = float(data_sample['WindDir_2'])
         wind_speed1 = float(data_sample['WindSpeed_1'])
         wind_speed2 = float(data_sample['WindSpeed_2'])
-        wind_u = nan # TODO function of wind_dir and speed
-        wind_v = nan # TODO function of wind_dir and speed
+        angle = (wind_dir1 + wind_dir2) / 2
+        magnitude = (wind_speed1 + wind_speed2) / 2
+        wind_u = math.cos(90 - angle) * magnitude
+        wind_v = math.sin(90 - angle) * magnitude
 
         data[time][features.index("air temp")] = (air_temp1 + air_temp2) / 2
         data[time][features.index("wind u")] = wind_u
@@ -170,14 +175,14 @@ def get_model_aws_data(start_date, end_date=None):
         bp_mbar = float(data_sample['BP_mbar'])
         rh_percent = float(data_sample['RH_percent'])
         longwave_in_raw = float(data_sample['LongWaveInRaw_wm2']) 
-        longwave_out_raw = float(data_sample['LongWaveOutRaw_wm2']) 
-        longwave_in_corr = float(data_sample['LongWaveInCorr_wm2']) 
-        longwave_out_corr = float(data_sample['LongWaveOutCorr_wm2']) 
+        # longwave_out_raw = float(data_sample['LongWaveOutRaw_wm2']) 
+        # longwave_in_corr = float(data_sample['LongWaveInCorr_wm2']) 
+        # longwave_out_corr = float(data_sample['LongWaveOutCorr_wm2']) 
         
-        shortwave = nan # TODO function of in and out
+        shortwave = shortwave_in - shortwave_out
         atmospheric_pressure = bp_mbar * 100 # Convert mbar to Pa
         relative_humidity = rh_percent / 100 # Convert to fraction
-        longwave = nan # TODO function of longwaves
+        longwave = longwave_in_raw
 
         data[time][features.index("shortwave")] = shortwave
         data[time][features.index("atmospheric pressure")] = atmospheric_pressure
@@ -189,5 +194,11 @@ def get_model_aws_data(start_date, end_date=None):
         columns=['time'] + features
     )
 
-    df.sort_values(by=['time'])
+    # Trim rows with nan
+    rows_with_nan = df.isnull().any(axis=1)
+    rows_with_nan = [idx for idx, is_nan in enumerate(rows_with_nan) if is_nan]
+    df.drop(axis=0, index=rows_with_nan, inplace=True)
+
+    df.sort_values(by=['time'], inplace=True)
+    df.reset_index(inplace=True, drop=True)
     return df
