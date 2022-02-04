@@ -6,7 +6,6 @@ Note: all timestamps are in UTC
 
 import math
 from collections import defaultdict
-from cv2 import magnitude
 import pandas as pd
 import datetime
 import requests
