@@ -64,6 +64,7 @@ class DataRetrievalService:
                 self.db[self.db['time'] < earliest_date],
                 combined_data
             ])
+            self.db.reset_index(drop=True, inplace=True)
 
         self.save()
 
@@ -145,7 +146,7 @@ if __name__ == "__main__":
     format_date = lambda date: datetime.datetime.strftime(date, "%Y-%m-%d %H:%M")
     past = format_date(drs.db['time'][0])
     future = format_date(drs.db['time'][len(drs.db) - 1])
-    print(f"[DataRetrievalService]: Fetched forecasts from {past} to {future}")
+    print(f"[DataRetrievalService]: Retrieved historical and forecasted points from {past} to {future}")
 
     # from matplotlib import pyplot as plt
     # t, v = drs.db['time'], drs.db['shortwave']
