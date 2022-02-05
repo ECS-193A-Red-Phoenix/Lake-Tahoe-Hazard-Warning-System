@@ -113,16 +113,20 @@ def get_model_nws_data():
 
     Units:         pandas Timestamp        wm2    Celcius                    Pa            fraction         wm2         ms         ms
     """
-    data = get_nws_json()
     features = ["time", "shortwave", "air temp", "atmospheric pressure", "relative humidity", "longwave", "wind u", "wind v"]
 
-    # Sometimes NWS API fails and gives us 'Unexpected Problem' as a response
-    for retry in range(5):
+    # Attempt to get data from NWS API multiple times
+    # Sometimes API fails and gives us 'Unexpected Problem' as a response
+    for req_attempt in range(5):
+        data = get_nws_json()
         if 'properties' in data:
+            # API returned data successfully
             break
-        data = get_nws_json() # Retry 5 times
+
     if 'properties' not in data:
-        return pd.DataFrame(columns=features) # Return empty DataFrame in case NWS is down
+        # API failed to return data multiple times
+        # API is most likely down, so return empty data table
+        return pd.DataFrame(columns=features)
 
     nws_features = ['windDirection', 'windSpeed', 'temperature', 'skyCover', 'relativeHumidity']
     model_data = defaultdict(lambda: [nan] * len(nws_features))
