@@ -143,6 +143,8 @@ def get_model_nws_data():
         [[time] + values for time, values in model_data.items()],
         columns=['time'] + nws_features
     )
+    # Rename NWS labels to be consistent with AWS
+    df.rename(columns={"temperature" : "air temp", "relativeHumidity": "relative humidity"}, inplace=True)
 
     # Trim rows with nan
     rows_with_nan = df.isnull().any(axis=1)
@@ -158,12 +160,12 @@ def get_model_nws_data():
     # Based on historical pressure and confirmed by barometric pressure eq 
     df['atmospheric pressure'] = 81600 # Pa
 
-    # Rename NWS labels
-    df.rename(columns={"temperature" : "air temp", "relativeHumidity": "relative humidity"}, inplace=True)
+    # Convert relative humidity to a fraction
+    df['relative humidity'] /= 100
 
     # Decompose windDirection and windSpeed into vector
-    df['wind u'] = np.cos(np.radians(df['windDirection'])) * df['windSpeed']
-    df['wind v'] = np.sin(np.radians(df['windDirection'])) * df['windSpeed']
+    df['wind u'] = np.cos(np.radians(df['windDirection'])) * df['windSpeed'] / 3.6 # Convert km/h to m/s
+    df['wind v'] = np.sin(np.radians(df['windDirection'])) * df['windSpeed'] / 3.6 
     df.drop('windDirection', axis=1, inplace=True)
     df.drop('windSpeed', axis=1, inplace=True)
 
