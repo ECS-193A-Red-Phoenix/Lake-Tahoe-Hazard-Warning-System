@@ -135,6 +135,8 @@ class DataRetrievalService:
                     prev_i += 1
                     next_i += 1
 
+        print(f"[DataRetrievalService]: Created surfbc.txt file with data from {format_date(start_date)} to {format_date(end_date)}")
+
 
 if __name__ == "__main__":
     today = datetime.datetime.now(datetime.timezone.utc)
