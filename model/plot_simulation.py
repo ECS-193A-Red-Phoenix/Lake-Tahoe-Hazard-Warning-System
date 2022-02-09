@@ -1,5 +1,5 @@
 """
-This file creates plots from the H-Plane file generated from the si3d model.
+This file was used to  temperature plots from the H-Plane file generated from the si3d model.
 Usage:
 Set the following parameters
 
@@ -9,15 +9,15 @@ dx           [float]: A float representing the delta x value used during simulat
 
 # Global
 import os
-h_plane_file = "./lt-hws/model/SampleModel/plane_2"
-dx = 800
+h_plane_file = "./model/psi3d/plane_2"
+dx = 200
 print("Running from", os.getcwd())
 print("Searching for h_plane file in", h_plane_file)
 
-from postprocessing.HPlane_Si3DtoPython import HPlane_Si3dToPython
+from HPlane_Si3DtoPython import HPlane_Si3dToPython
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider
-
+import numpy as np
 
 class DynamicPlot:
     def __init__(self, on_plot, min_value, max_value, init_value, val_step, slider_name='Value'):
@@ -33,11 +33,11 @@ class DynamicPlot:
             slider_name (str, optional): A name for the slider. Defaults to 'Value'.
         """
         self.fig, self.ax = plt.subplots()
-        plt.subplots_adjust(left=0.25, bottom=0.25)
+        plt.subplots_adjust(right=0.8)
         self.ax.margins(x=0)
 
         self.axcolor = 'lightgoldenrodyellow'
-        self.ax_slider = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=self.axcolor)
+        self.ax_slider = plt.axes([0.25, 0.05, 0.65, 0.01], facecolor=self.axcolor)
         
         self.s_value = Slider(self.ax_slider, slider_name, min_value, max_value, valinit=init_value, valstep=val_step)
 
@@ -54,12 +54,25 @@ class DynamicPlot:
         plt.show()
 
 h_plane = HPlane_Si3dToPython(h_plane_file, dx)
+xg = h_plane['xg']
+yg = h_plane['yg']
 n_rows, n_cols, n_frames = h_plane['T'].shape
+print(f"(row, cols, n_frames) = {(n_rows, n_cols, n_frames)}")
 
 def on_plot(my_plot, frame):
-    z = h_plane['T'][::-1, :, frame]
-    my_plot.ax.imshow(z)
-    my_plot.ax.set_title("Temperature")
+    z = h_plane['T'][:, :, frame]
+    surface_temp = my_plot.ax.pcolormesh(xg, yg, z, shading='gouraud', cmap='RdYlBu_r')
+    my_plot.ax.set_aspect('equal')
+    my_plot.ax.axis('off')
+
+    my_plot.fig.suptitle(f"{h_plane['time'][frame]}")
+
+    if hasattr(my_plot, 'cbar'):
+        my_plot.cbar.remove()
+    my_plot.cax = plt.axes([0.7, 0.125, 0.02, 0.75])
+    my_plot.cbar = my_plot.fig.colorbar(surface_temp, cax=my_plot.cax)
+    my_plot.cbar.ax.tick_params(labelsize=9)
+    my_plot.ax.text(0.8, 0.5, "° Celsius", transform=my_plot.fig.transFigure)
 
 tmp_plot = DynamicPlot(on_plot, 0, n_frames - 1, 7, 1, 'Frame #')
 tmp_plot.show()

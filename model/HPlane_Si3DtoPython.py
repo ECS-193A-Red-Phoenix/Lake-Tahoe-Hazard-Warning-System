@@ -150,7 +150,12 @@ def HPlane_Si3dToPython(h_plane_file, dx):
 
     del dum1, dum2, dum3, dum4, dum5, dum6
 
+    format_date = lambda y, m, d, h: f"{y:0>4.0f}-{m:0>2.0f}-{d:0>2.0f} {h:0>2.0f}"
+    time = [format_date(year[i], month[i], day[i], hour[i]) for i in range(n_frames + 1)]
     output = {}
+    output['time'] = time
+    output['xg'] = xg
+    output['yg'] = yg
     output['u'] = ug
     output['v'] = vg
     output['w'] = wg
