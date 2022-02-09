@@ -3,3 +3,4 @@ venv.sh
 __pycache__
 .vscode
 .test
+outputs
