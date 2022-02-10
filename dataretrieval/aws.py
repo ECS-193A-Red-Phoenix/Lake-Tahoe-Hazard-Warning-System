@@ -18,29 +18,8 @@ def get_uscg_json(start_date, id=1, end_date=None):
         'ID': '1', 
         'Station_Name': 'USCG2020', 
         'TmStamp': '2021-01-04 23:40:00', 
-        'Batt_V': '13.83', 
-        'LoggerTemp_C': '4.521', 
+            ... (omitted)
         'AirTemp_C': '2.958', 
-        'RH_percent': '85.1', 
-        'WindSpd_ms': '7.971', 
-        'WindDir_deg': '243.3', 
-        'WindSpdMax_ms': '15.28', 
-        'Precip_mm': '0.1', 
-        'WaterTemp_C': '3.535637', 
-        'BP_mbar': '805.8001', 
-        'ShortWaveIn_wm2': '27.8', 
-        'ShortWaveOut_wm2': '1.658', 
-        'LongWaveInRaw_wm2': '-12.47', 
-        'LongWaveOutRaw_wm2': '8.14', 
-        'LongWaveInCorr_wm2': '314.7', 
-        'LongWaveOutCorr_wm2': '335.3', 
-        'NR01TC_Avg': '2.458', 
-        'NR01TK_Avg': '275.6', 
-        'NetRs_Avg': '26.14', 
-        'NetRl_Avg': '-20.6', 
-        'Albedo_Avg': '0.06', 
-        'UpTot_Avg': '15.33', 
-        'DnTot_Avg': '9.8', 
         'NetTot_Avg': '5.534'
     }
 
@@ -139,7 +118,13 @@ def get_model_aws_data(start_date, end_date=None):
         start_date (datetime): start date of the query, in UTC
         end_date (datetime, optional): end date of the query. Defaults to None, giving 24 hours after start_date
     Returns:
-        pandas.DataFrame Object
+        pandas.DataFrame Object, example below
+                             time  shortwave  air temp  atmospheric pressure  relative humidity  longwave    wind u    wind v 
+        2022-02-09 00:00:00+00:00    194.570      8.50              82023.55             0.3351    -125.6 -1.468730 -3.666788 
+        2022-02-09 00:20:00+00:00    136.750      8.30              82023.49             0.3080    -125.9  1.883689  5.643954 
+        2022-02-09 00:40:00+00:00     83.340      8.80              82029.78             0.3145    -124.6 -6.499837 -0.045988 
+        2022-02-09 01:00:00+00:00     39.700      8.15              82031.74             0.2951    -123.2 -5.834419 -0.426680 
+        2022-02-09 01:20:00+00:00      4.562      7.70              82042.11             0.3268    -117.6  1.975616  4.593141 
     """
     parse_date = lambda date: datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S") \
                                                .replace(tzinfo=datetime.timezone.utc)
@@ -174,9 +159,6 @@ def get_model_aws_data(start_date, end_date=None):
         bp_mbar = float(data_sample['BP_mbar'])
         rh_percent = float(data_sample['RH_percent'])
         longwave_in_raw = float(data_sample['LongWaveInRaw_wm2']) 
-        # longwave_out_raw = float(data_sample['LongWaveOutRaw_wm2']) 
-        # longwave_in_corr = float(data_sample['LongWaveInCorr_wm2']) 
-        # longwave_out_corr = float(data_sample['LongWaveOutCorr_wm2']) 
         
         shortwave = shortwave_in - shortwave_out
         atmospheric_pressure = bp_mbar * 100 # Convert mbar to Pa
@@ -197,6 +179,8 @@ def get_model_aws_data(start_date, end_date=None):
     rows_with_nan = df.isnull().any(axis=1)
     rows_with_nan = [idx for idx, is_nan in enumerate(rows_with_nan) if is_nan]
     df.drop(axis=0, index=rows_with_nan, inplace=True)
+
+    # TODO Remove rows with outlier data
 
     df.sort_values(by=['time'], inplace=True)
     df.reset_index(inplace=True, drop=True)
