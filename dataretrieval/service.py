@@ -64,7 +64,7 @@ class DataRetrievalService:
                 self.db[self.db['time'] < earliest_date],
                 combined_data
             ])
-            self.db.reset_index(drop=True, inplace=True)
+        self.db.reset_index(drop=True, inplace=True)
 
         self.save()
 
