@@ -23,8 +23,6 @@ TERC provides the following parameters through these stations:
     2. Atmospheric pressure
     3. Relative humidity
     4. Longwave
-3. Nearshore
-    1. 
 
 ## National Weather Service API
 NWS API provides the following parameters:
