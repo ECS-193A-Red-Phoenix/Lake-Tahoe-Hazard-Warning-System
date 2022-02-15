@@ -110,7 +110,7 @@ def get_near_shore_json(start_date, id=9, end_date=None):
     return response
 
 
-def get_model_aws_data(start_date, end_date=None):
+def get_model_historical_data(start_date, end_date=None):
     """Retrieves Lake Tahoe data from AWS and formats it to be only the
     the data that the model requires
 

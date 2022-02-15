@@ -17,8 +17,8 @@ Example Usage:
 >>> drs.retrieve()
 """
 
-from aws import get_model_aws_data
-from nws import get_model_nws_data
+from aws import get_model_historical_data
+from nws import get_model_forecast_data
 import datetime
 import pandas as pd
 import os
@@ -46,8 +46,8 @@ class DataRetrievalService:
         """
         today = datetime.datetime.now(datetime.timezone.utc)
         last_week = today - datetime.timedelta(weeks=1)
-        aws_data = get_model_aws_data(start_date=last_week, end_date=today)
-        nws_data = get_model_nws_data()
+        aws_data = get_model_historical_data(start_date=last_week, end_date=today)
+        nws_data = get_model_forecast_data()
     
         # Combine the two
         most_recent_aws_date = aws_data['time'][len(aws_data) - 1] if len(aws_data) > 0 else today

@@ -97,7 +97,7 @@ def get_nws_json():
     return response
 
 
-def get_model_nws_data():
+def get_model_forecast_data():
     """
     Retrieves data from the nws api and filters it to contain only data
     required by the model 
