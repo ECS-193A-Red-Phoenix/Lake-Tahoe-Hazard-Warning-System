@@ -109,6 +109,21 @@ def get_near_shore_json(start_date, id=9, end_date=None):
     response = requests.get(url, params=params).json()
     return response
 
+# Min and max values for attributes with outlier values
+# Allows for removing those outliers
+
+ATTR_BOUNDARIES = {
+    'shortwave': (0, 1200),
+    # R.h is a ratio: current humidity / max humidity
+    'atmospheric pressure': (75000, 85000),
+    'longwave': (-500, 500),
+    'shortwave': (-200, 1000),
+    'relative humidity': (0, 2)
+}
+
+# Aliases for getting min and max values from ATTR_BOUNDARIES
+MIN = 0
+MAX = 1
 
 def get_model_historical_data(start_date, end_date=None):
     """Retrieves Lake Tahoe data from AWS and formats it to be only the
@@ -180,8 +195,15 @@ def get_model_historical_data(start_date, end_date=None):
     rows_with_nan = [idx for idx, is_nan in enumerate(rows_with_nan) if is_nan]
     df.drop(axis=0, index=rows_with_nan, inplace=True)
 
-    # TODO Remove rows with outlier data
+    # Go through all the time points and delete outliers
+    for time_point in df:
+        for attr in df.columns:
+            if ATTR_BOUNDARIES[attr][MIN] <= time_point[attr] <= ATTR_BOUNDARIES[attr][MAX]:
+                continue
+            # Out of boundaries
+            df.drop(time_point)
 
     df.sort_values(by=['time'], inplace=True)
     df.reset_index(inplace=True, drop=True)
+
     return df
