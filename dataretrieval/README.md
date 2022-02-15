@@ -2,10 +2,11 @@
 # Data Retrieval Service
 
 ## Purpose
-The data retrieval service is a Python script that continuously:
+The data retrieval service, `service.py`, is a Python script that continuously:
 1. Fetches meterological data from:
 - TERC's AWS (Amazon Web Services) API
 - National Weather Service API
+2. Parses the meterological data into an input file called `surfbc.txt`
 
 <!--
 ## Model Parameters
