@@ -196,12 +196,28 @@ def get_model_historical_data(start_date, end_date=None):
     df.drop(axis=0, index=rows_with_nan, inplace=True)
 
     # Go through all the time points and delete outliers
-    for time_point in df:
-        for attr in df.columns:
-            if ATTR_BOUNDARIES[attr][MIN] <= time_point[attr] <= ATTR_BOUNDARIES[attr][MAX]:
+    df_np = df.to_numpy()
+    for time_point in df_np:
+        # Check each attribute for outliers
+        # Start at index 1 to skip time attribute
+        for i in range(1, len(time_point)):
+            # Name of attribute
+            feature = features[i - 1]
+            # Skip attribute if there's no boundaries
+            if ATTR_BOUNDARIES.get(feature) == None:
                 continue
-            # Out of boundaries
-            df.drop(time_point)
+            # Check if outlier
+            if ATTR_BOUNDARIES[feature][MIN] <= time_point[i] <= ATTR_BOUNDARIES[feature][MAX]:
+                continue
+            # Found outlier
+            # Set outlier to nan
+            print("Found outlier at", i)
+            print(time_point)
+            time_point[i] = None
+            print("New:", time_point)
+            break
+    # Save changes
+    df = pd.DataFrame(df_np)
 
     df.sort_values(by=['time'], inplace=True)
     df.reset_index(inplace=True, drop=True)
