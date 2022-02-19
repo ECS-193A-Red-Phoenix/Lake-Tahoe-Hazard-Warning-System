@@ -168,8 +168,8 @@ def get_model_forecast_data():
     df['relative humidity'] /= 100
 
     # Decompose windDirection and windSpeed into vector
-    df['wind u'] = np.cos(np.radians(df['windDirection'])) * df['windSpeed'] / 3.6 # Convert km/h to m/s
-    df['wind v'] = np.sin(np.radians(df['windDirection'])) * df['windSpeed'] / 3.6 
+    df['wind u'] = np.cos(np.radians(df['windDirection'])) * -1 * df['windSpeed'] / 3.6 # Convert km/h to m/s
+    df['wind v'] = np.sin(np.radians(df['windDirection'])) * -1 * df['windSpeed'] / 3.6 
     df.drop('windDirection', axis=1, inplace=True)
     df.drop('windSpeed', axis=1, inplace=True)
 
