@@ -4,8 +4,8 @@ Lake Tahoe Station data from AWS.
 Note: all timestamps are in UTC
 """
 
-import math
 from collections import defaultdict
+import numpy as np
 import pandas as pd
 import datetime
 import requests
@@ -132,8 +132,8 @@ def get_model_historical_data(start_date, end_date=None):
     buoy_json = get_nasa_buoy_json(start_date, end_date=end_date)
     uscg_json = get_uscg_json(start_date, end_date=end_date)
 
-    features = ["shortwave", "air temp", "atmospheric pressure", "relative humidity", "longwave", "wind u", "wind v"]
-    data = defaultdict(lambda: [math.nan] * len(features))
+    features = ["shortwave", "air temp", "atmospheric pressure", "relative humidity", "longwave", "wind speed", "wind direction"]
+    data = defaultdict(lambda: [np.nan] * len(features))
 
     for data_sample in buoy_json:
         time = parse_date(data_sample['TmStamp'])
@@ -143,14 +143,12 @@ def get_model_historical_data(start_date, end_date=None):
         wind_dir2 = float(data_sample['WindDir_2'])
         wind_speed1 = float(data_sample['WindSpeed_1'])
         wind_speed2 = float(data_sample['WindSpeed_2'])
-        angle = (wind_dir1 + wind_dir2) / 2
-        magnitude = (wind_speed1 + wind_speed2) / 2
-        wind_u = math.cos(90 - angle) * magnitude
-        wind_v = math.sin(90 - angle) * magnitude
+        wind_dir = (wind_dir1 + wind_dir2) / 2
+        wind_speed = (wind_speed1 + wind_speed2) / 2
 
         data[time][features.index("air temp")] = (air_temp1 + air_temp2) / 2
-        data[time][features.index("wind u")] = wind_u
-        data[time][features.index("wind v")] = wind_v
+        data[time][features.index("wind speed")] = wind_speed
+        data[time][features.index("wind direction")] = wind_dir
 
     for data_sample in uscg_json:
         time = parse_date(data_sample['TmStamp'])
@@ -158,12 +156,12 @@ def get_model_historical_data(start_date, end_date=None):
         shortwave_out = float(data_sample['ShortWaveOut_wm2']) 
         bp_mbar = float(data_sample['BP_mbar'])
         rh_percent = float(data_sample['RH_percent'])
-        longwave_in_raw = float(data_sample['LongWaveInRaw_wm2']) 
+        longwave_in_corr = float(data_sample['LongWaveInCorr_wm2'])
         
         shortwave = shortwave_in - shortwave_out
         atmospheric_pressure = bp_mbar * 100 # Convert mbar to Pa
         relative_humidity = rh_percent / 100 # Convert to fraction
-        longwave = longwave_in_raw
+        longwave = longwave_in_corr
 
         data[time][features.index("shortwave")] = shortwave
         data[time][features.index("atmospheric pressure")] = atmospheric_pressure
@@ -175,13 +173,100 @@ def get_model_historical_data(start_date, end_date=None):
         columns=['time'] + features
     )
 
-    # Trim rows with nan
+    # Trim rows that have nan
     rows_with_nan = df.isnull().any(axis=1)
     rows_with_nan = [idx for idx, is_nan in enumerate(rows_with_nan) if is_nan]
     df.drop(axis=0, index=rows_with_nan, inplace=True)
 
-    # TODO Remove rows with outlier data
-
     df.sort_values(by=['time'], inplace=True)
     df.reset_index(inplace=True, drop=True)
+
+    remove_outliers(df)
+
+    # Decompose wind speed and wind direction into vector
+    df['wind u'] = np.sin(np.radians(df['wind direction'])) * -1 * df['wind speed']
+    df['wind v'] = np.cos(np.radians(df['wind direction'])) * -1 * df['wind speed']
+    df.drop('wind direction', axis=1, inplace=True)
+    df.drop('wind speed', axis=1, inplace=True)
+
+    # Redundacy here Ensure dataframe leaves with no NaNs
+    rows_with_nan = df.isnull().any(axis=1)
+    rows_with_nan = [idx for idx, is_nan in enumerate(rows_with_nan) if is_nan]
+    df.drop(axis=0, index=rows_with_nan, inplace=True)
     return df
+
+
+ATTR_BOUNDS = {
+    "relative humidity": [0, 1],
+    "shortwave": [-0.001, 1300],
+    "longwave": [50, 450],
+    "atmospheric pressure": [75000, 90000],
+    "air temp": [-20, 70],
+    "wind speed": [0, 40],
+    "wind direction": [0, 360],
+}
+
+def remove_outliers(df):
+    """ Removes outliers from AWS dataframe, inplace. This is completed in 4 steps.
+
+    1. Median filtering
+
+    2. All data is clipped by some bounds defined in ATTR_BOUNDS. If data is outside
+    these bounds are clipped to the edges of these bounds.
+
+    3. All data that deviates more than 3 standard deviations are set to mean of the 
+    neighboring 100 points.
+
+    4. All data that is STILL sitting at the bounds are replaced with the mean of the
+    neighboring 100 points.
+
+    5. Median filtering again
+
+    Args:
+        df (pd.DataFrame): dataframe containing historical AWS model data
+    """
+    
+    median_filtering(df)
+
+    # Clip features between lo and hi
+    for feature, (lo, hi) in ATTR_BOUNDS.items():
+        # Clip features
+        df[feature] = np.clip(df[feature], lo, hi)
+
+    # Set features > 3 std to mean
+    for feature in df.columns:
+        if feature == 'time':
+            continue
+
+        mean = df[feature].rolling(window=100, center=True, min_periods=1).mean()
+        std = df[feature].rolling(window=100, center=True, min_periods=1).std()
+        std[0] = 0 
+        lo = mean - 3 * std
+        hi = mean + 3 * std
+
+        # Replace deviating features with mean
+        df[feature].where(lo < df[feature], mean, inplace=True)
+        df[feature].where(df[feature] < hi, mean, inplace=True)
+
+    for feature, (lo, hi) in ATTR_BOUNDS.items():
+        # Shortwave is an edge case, where its okay for data to sit at the bounds
+        if feature == 'shortwave':
+            continue
+        mean = df[feature].rolling(window=100, center=True, min_periods=1).mean()
+        df[feature].where(df[feature] != hi, mean, inplace=True)
+        df[feature].where(df[feature] != lo, mean, inplace=True)
+
+    median_filtering(df)
+
+
+def median_filtering(df):
+    """Replaces points with the median of neighboring points, inplace
+
+    Args:
+        df (pd.DataFrame): DataFrame to filter
+    """
+    for feature in df.columns:
+        if feature == 'time':
+            continue
+        median = df[feature].rolling(window=5, min_periods=1, center=True).median()
+        df[feature] = median

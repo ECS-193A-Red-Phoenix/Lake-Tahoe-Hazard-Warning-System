@@ -150,11 +150,15 @@ if __name__ == "__main__":
     future = format_date(drs.db['time'][len(drs.db) - 1])
     print(f"[DataRetrievalService]: Retrieved historical and forecasted points from {past} to {future}")
 
-    # from matplotlib import pyplot as plt
-    # t, v = drs.db['time'], drs.db['shortwave']
-    # plt.xlabel("Time")
-    # plt.ylabel("Shortwave")
-    # plt.title("Concatenated Historical and Forecasted Shortwave")
-    # plt.plot(t, v)
-    # plt.show()
+    from matplotlib import pyplot as plt
+    for feature in drs.db.columns:
+        if feature == 'time':
+            continue
+
+        t, f = drs.db['time'], drs.db[feature]
+        plt.xlabel("Time")
+        plt.ylabel(feature)
+        plt.title(feature)
+        plt.plot(t, f)
+        plt.show()
 
