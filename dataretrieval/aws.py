@@ -11,7 +11,7 @@ import datetime
 import requests
 
 
-def get_uscg_json(start_date, id=1, end_date=None):
+def get_uscg_json(start_date, end_date=None):
     """ Retrieves data from the Lake Tahoe USCG Station
     The JSON data contains an array of objects in the following format
     {
@@ -22,13 +22,14 @@ def get_uscg_json(start_date, id=1, end_date=None):
         'AirTemp_C': '2.958', 
         'NetTot_Avg': '5.534'
     }
+    ID represents station ID. There is only 1 station so we use an ID of 1
 
     Args:
         start_date (datetime.datetime): starting date of query in UTC
-        id (int, optional): Station ID, Currently there is only 1 Station. Defaults to 1.
         end_date (datetime.datetime, optional): end date of query. Defaults to None (24 hour period).
     """
-    format_date = lambda date: date.strftime("%Y%m%d") 
+    # Set request parameters
+    format_date = lambda date: date.strftime("%Y%m%d")
     params = {
         "id": id,
         "rptdate": format_date(start_date),
