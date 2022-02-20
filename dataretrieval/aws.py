@@ -16,102 +16,81 @@ ENDPOINTS = {
     'NEARSHORE': "https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/ns-station-range"
 }
 
-def get_uscg_json(start_date, end_date=None):
-    """ Retrieves data from the Lake Tahoe USCG Station
-    The JSON data contains an array of objects in the following format
-    {
-        'ID': '1', 
-        'Station_Name': 'USCG2020', 
-        'TmStamp': '2021-01-04 23:40:00', 
-            ... (omitted)
-        'AirTemp_C': '2.958', 
-        'NetTot_Avg': '5.534'
-    }
-    ID represents station ID. There is only 1 station so we use an ID of 1
+"""
+JSON Data Formats (examples)
+------------
+USCG Station:
+{
+    'ID': '1',
+    'Station_Name': 'USCG2020',
+    'TmStamp': '2021-01-04 23:40:00',
+        ... (omitted)
+    'AirTemp_C': '2.958',
+    'NetTot_Avg': '5.534'
+}
 
-    Args:
-        start_date (datetime.datetime): starting date of query in UTC
-        end_date (datetime.datetime, optional): end date of query. Defaults to None (24 hour period).
-    """
-    # Set request parameters
+NASA Buoy:
+{
+    "ID": "4",
+    "Station_Name": "tb4",
+    "TmStamp": "2022-01-22 00:00:00",
+    "RBR_0p5_m": "5.97",
+    "WindSpeed_1": "12.7",
+    "AirTemp_1": "1.5",
+    "WindDir_1": "53.4",
+    "WindSpeed_2": "11.0",
+    "AirTemp_2": "1.9",
+    "WindDir_2": "199.4"
+}
+
+Nearshore:
+{
+    "ID": "9",
+    "Station_Name": "Tahoe City",
+    "TmStamp": "2022-01-22 00:00:00",
+    "LS_Chlorophyll_Avg": "194.8053",
+    "LS_Temp_Avg": "5.1184",
+    "LS_Turbidity_Avg": "14.75914",
+    "WaveHeight": "0.0709095"
+}
+"""
+
+## Default station IDs to use
+
+# There is only 1 USCG station with this ID
+USCG_ID = 1
+# There are 4 NASA buoys with ID's 1-4
+NASA_BUOY_ID = 4
+# Multiple nearshore stations with ID's 1-9
+NEAR_SHORE_ID = 9
+
+"""
+Args:
+    name (str): endpoint name
+    station (int): station id
+    start_date (datetime): starting date of query
+    end_date (datetime, optional): end date of query
+"""
+def get_endpoint_json(name, id, start_date, end_date=None):
+    # Must specify an endpoint
+    if ENDPOINTS.get(name) == None:
+        # Given endpoint is invalid
+        raise ValueError
+
+    # Set GET request parameters
+    # We must specify the start and end time of the desired data
     format_date = lambda date: date.strftime("%Y%m%d")
     params = {
         "id": id,
         "rptdate": format_date(start_date),
     }
+    # Also specify end date if applicable
     if end_date is not None:
         params['rptend'] = format_date(end_date)
 
-    response = requests.get(ENDPOINTS['USCG'], params=params).json()
+    # Send request and return data in JSON format
+    response = requests.get(ENDPOINTS[name], params=params).json()
     return response
-
-
-def get_nasa_buoy_json(start_date, id=4, end_date=None):
-    """Retrieves JSON data from NASA Buoy in Lake Tahoe
-    The JSON data contains an array of objects in the following format
-    {
-        "ID": "4",
-        "Station_Name": "tb4",
-        "TmStamp": "2022-01-22 00:00:00",
-        "RBR_0p5_m": "5.97",
-        "WindSpeed_1": "12.7",
-        "AirTemp_1": "1.5",
-        "WindDir_1": "53.4",
-        "WindSpeed_2": "11.0",
-        "AirTemp_2": "1.9",
-        "WindDir_2": "199.4"
-    },
-
-    Args:
-        start_date (datetime): starting date of query
-        id (int, optional): NASA Buoy ID in [1, 4]. Defaults to 4.
-        end_date (datetime, optional): end date of query. Defaults to None.
-    """
-    assert 1 <= id <= 4, f"Expected NASA Buoy ID in [1, 4] got {id}"
-
-    format_date = lambda date: date.strftime("%Y%m%d") 
-    params = {
-        "id": id,
-        "rptdate": format_date(start_date),
-    }
-    if end_date is not None:
-        params['rptend'] = format_date(end_date)
-
-    response = requests.get(ENDPOINTS['NASA_BUOY'], params=params).json()
-    return response
-
-
-def get_near_shore_json(start_date, id=9, end_date=None):
-    """Retrieves JSON data from Near Shore station in Lake Tahoe
-    The JSON data contains an array of objects in the following format
-    {
-        "ID": "9",
-        "Station_Name": "Tahoe City",
-        "TmStamp": "2022-01-22 00:00:00",
-        "LS_Chlorophyll_Avg": "194.8053",
-        "LS_Temp_Avg": "5.1184",
-        "LS_Turbidity_Avg": "14.75914",
-        "WaveHeight": "0.0709095"
-    }
-
-    Args:
-        start_date (datetime): starting date of query in UTC
-        id (int, optional): Station ID in [1, 9]. Defaults to 9. 
-        end_date (datetime, optional): end date of query. Defaults to None.
-    """
-    assert 1 <= id <= 9, f"Expected Near Shore Station ID in [1, 9] got {id}"
-
-    format_date = lambda date: date.strftime("%Y%m%d") 
-    params = {
-        "id": id,
-        "rptdate": format_date(start_date),
-    }
-    if end_date is not None:
-        params['rptend'] = format_date(end_date)
-
-    response = requests.get(ENDPOINTS['NEARSHORE'], params=params).json()
-    return response
-
 
 def get_model_historical_data(start_date, end_date=None):
     """Retrieves Lake Tahoe data from AWS and formats it to be only the
@@ -132,8 +111,8 @@ def get_model_historical_data(start_date, end_date=None):
     parse_date = lambda date: datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S") \
                                                .replace(tzinfo=datetime.timezone.utc)
 
-    buoy_json = get_nasa_buoy_json(start_date, end_date=end_date)
-    uscg_json = get_uscg_json(start_date, end_date=end_date)
+    buoy_json = get_endpoint_json(ENDPOINTS['NASA_BUOY'], NASA_BUOY_ID, start_date, end_date=end_date)
+    uscg_json = get_endpoint_json(ENDPOINTS['USCG'], USCG_ID, start_date, end_date=end_date)
 
     features = ["shortwave", "air temp", "atmospheric pressure", "relative humidity", "longwave", "wind speed", "wind direction"]
     data = defaultdict(lambda: [np.nan] * len(features))
