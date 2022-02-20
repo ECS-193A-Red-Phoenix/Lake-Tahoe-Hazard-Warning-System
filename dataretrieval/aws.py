@@ -66,19 +66,14 @@ NEAR_SHORE_ID = 9
 
 """
 Args:
-    name (str): endpoint name
+    url (str): endpoint url
     station (int): station id
     start_date (datetime): starting date of query
-    end_date (datetime, optional): end date of query
+    end_date (datetime, optional): end date of query.
+    Data will start from midnight on start_date
 """
-def get_endpoint_json(name, id, start_date, end_date=None):
-    # Must specify an endpoint
-    if ENDPOINTS.get(name) == None:
-        # Given endpoint is invalid
-        raise ValueError
-
+def get_endpoint_json(url, id, start_date, end_date=None):
     # Set GET request parameters
-    # We must specify the start and end time of the desired data
     format_date = lambda date: date.strftime("%Y%m%d")
     params = {
         "id": id,
@@ -89,25 +84,26 @@ def get_endpoint_json(name, id, start_date, end_date=None):
         params['rptend'] = format_date(end_date)
 
     # Send request and return data in JSON format
-    response = requests.get(ENDPOINTS[name], params=params).json()
+    response = requests.get(url, params=params).json()
     return response
 
-def get_model_historical_data(start_date, end_date=None):
-    """Retrieves Lake Tahoe data from AWS and formats it to be only the
-    the data that the model requires
+"""
+1. Retrieves Lake Tahoe data from AWS
+2. Preprocesses the data so the model can use it
 
-    Args:
-        start_date (datetime): start date of the query, in UTC
-        end_date (datetime, optional): end date of the query. Defaults to None, giving 24 hours after start_date
-    Returns:
-        pandas.DataFrame Object, example below
-                             time  shortwave  air temp  atmospheric pressure  relative humidity  longwave    wind u    wind v 
-        2022-02-09 00:00:00+00:00    194.570      8.50              82023.55             0.3351    -125.6 -1.468730 -3.666788 
-        2022-02-09 00:20:00+00:00    136.750      8.30              82023.49             0.3080    -125.9  1.883689  5.643954 
-        2022-02-09 00:40:00+00:00     83.340      8.80              82029.78             0.3145    -124.6 -6.499837 -0.045988 
-        2022-02-09 01:00:00+00:00     39.700      8.15              82031.74             0.2951    -123.2 -5.834419 -0.426680 
-        2022-02-09 01:20:00+00:00      4.562      7.70              82042.11             0.3268    -117.6  1.975616  4.593141 
-    """
+Args:
+    start_date (datetime): start date of the query, in UTC
+    end_date (datetime, optional): end date of the query. Set 24 hours after the start date by default
+Returns:
+    pandas.DataFrame Object, example below
+                            time  shortwave  air temp  atmospheric pressure  relative humidity  longwave    wind u    wind v 
+    2022-02-09 00:00:00+00:00    194.570      8.50              82023.55             0.3351    -125.6 -1.468730 -3.666788 
+    2022-02-09 00:20:00+00:00    136.750      8.30              82023.49             0.3080    -125.9  1.883689  5.643954 
+    2022-02-09 00:40:00+00:00     83.340      8.80              82029.78             0.3145    -124.6 -6.499837 -0.045988 
+    2022-02-09 01:00:00+00:00     39.700      8.15              82031.74             0.2951    -123.2 -5.834419 -0.426680 
+    2022-02-09 01:20:00+00:00      4.562      7.70              82042.11             0.3268    -117.6  1.975616  4.593141 
+"""
+def get_model_historical_data(start_date, end_date=None):
     parse_date = lambda date: datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S") \
                                                .replace(tzinfo=datetime.timezone.utc)
 
@@ -115,9 +111,14 @@ def get_model_historical_data(start_date, end_date=None):
     uscg_json = get_endpoint_json(ENDPOINTS['USCG'], USCG_ID, start_date, end_date=end_date)
 
     features = ["shortwave", "air temp", "atmospheric pressure", "relative humidity", "longwave", "wind speed", "wind direction"]
-    data = defaultdict(lambda: [np.nan] * len(features))
 
+    # Historical data to build and return
+    historical = defaultdict(lambda: [np.nan] * len(features))
+
+    ## Parse data samples
+    # NASA Buoy data samples
     for data_sample in buoy_json:
+        # Parse raw data from JSON
         time = parse_date(data_sample['TmStamp'])
         air_temp1 = float(data_sample['AirTemp_1'])
         air_temp2 = float(data_sample['AirTemp_2'])
@@ -125,33 +126,41 @@ def get_model_historical_data(start_date, end_date=None):
         wind_dir2 = float(data_sample['WindDir_2'])
         wind_speed1 = float(data_sample['WindSpeed_1'])
         wind_speed2 = float(data_sample['WindSpeed_2'])
+
+        # Take average of raw data that was measured with two instruments
         wind_dir = (wind_dir1 + wind_dir2) / 2
         wind_speed = (wind_speed1 + wind_speed2) / 2
+        air_temp = (air_temp1 + air_temp2) / 2
+        # Save data for this sample
+        historical[time][features.index("air temp")] = air_temp
+        historical[time][features.index("wind speed")] = wind_speed
+        historical[time][features.index("wind direction")] = wind_dir
 
-        data[time][features.index("air temp")] = (air_temp1 + air_temp2) / 2
-        data[time][features.index("wind speed")] = wind_speed
-        data[time][features.index("wind direction")] = wind_dir
-
+    # USCG data samples
     for data_sample in uscg_json:
+        # Parse raw data
         time = parse_date(data_sample['TmStamp'])
         shortwave_in = float(data_sample['ShortWaveIn_wm2']) 
         shortwave_out = float(data_sample['ShortWaveOut_wm2']) 
         bp_mbar = float(data_sample['BP_mbar'])
         rh_percent = float(data_sample['RH_percent'])
         longwave_in_corr = float(data_sample['LongWaveInCorr_wm2'])
-        
+
+        # Calculations
         shortwave = shortwave_in - shortwave_out
         atmospheric_pressure = bp_mbar * 100 # Convert mbar to Pa
         relative_humidity = rh_percent / 100 # Convert to fraction
         longwave = longwave_in_corr
 
-        data[time][features.index("shortwave")] = shortwave
-        data[time][features.index("atmospheric pressure")] = atmospheric_pressure
-        data[time][features.index("relative humidity")] = relative_humidity
-        data[time][features.index("longwave")] = longwave
+        # Save data for this sample
+        historical[time][features.index("shortwave")] = shortwave
+        historical[time][features.index("atmospheric pressure")] = atmospheric_pressure
+        historical[time][features.index("relative humidity")] = relative_humidity
+        historical[time][features.index("longwave")] = longwave
 
+    # Convert historical data to dataframe
     df = pd.DataFrame(
-        [[time] + features for time, features in data.items()],
+        [[time] + features for time, features in historical.items()],
         columns=['time'] + features
     )
 
