@@ -169,8 +169,7 @@ def get_model_historical_data(start_date, end_date=None):
     rows_with_nan = [idx for idx, is_nan in enumerate(rows_with_nan) if is_nan]
     df.drop(axis=0, index=rows_with_nan, inplace=True)
 
-    df.sort_values(by=['time'], inplace=True)
-    df.reset_index(inplace=True, drop=True)
+    df.sort_values(by=['time'], inplace=True, ignore_index=True)
 
     remove_outliers(df)
 
