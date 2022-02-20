@@ -10,6 +10,11 @@ import pandas as pd
 import datetime
 import requests
 
+ENDPOINTS = {
+    'USCG': "https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/met-uscg2020",
+    'NASA_BUOY': "https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/nasa-tb",
+    'NEARSHORE': "https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/ns-station-range"
+}
 
 def get_uscg_json(start_date, end_date=None):
     """ Retrieves data from the Lake Tahoe USCG Station
@@ -37,8 +42,7 @@ def get_uscg_json(start_date, end_date=None):
     if end_date is not None:
         params['rptend'] = format_date(end_date)
 
-    url = "https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/met-uscg2020"
-    response = requests.get(url, params=params).json()
+    response = requests.get(ENDPOINTS['USCG'], params=params).json()
     return response
 
 
@@ -73,8 +77,7 @@ def get_nasa_buoy_json(start_date, id=4, end_date=None):
     if end_date is not None:
         params['rptend'] = format_date(end_date)
 
-    url = "https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/nasa-tb"
-    response = requests.get(url, params=params).json()
+    response = requests.get(ENDPOINTS['NASA_BUOY'], params=params).json()
     return response
 
 
@@ -106,8 +109,7 @@ def get_near_shore_json(start_date, id=9, end_date=None):
     if end_date is not None:
         params['rptend'] = format_date(end_date)
 
-    url = "https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/ns-station-range"
-    response = requests.get(url, params=params).json()
+    response = requests.get(ENDPOINTS['NEARSHORE'], params=params).json()
     return response
 
 
