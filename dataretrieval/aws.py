@@ -70,7 +70,6 @@ Args:
     station (int): station id
     start_date (datetime): starting date of query
     end_date (datetime, optional): end date of query.
-    Data will start from midnight on start_date
 """
 def get_endpoint_json(url, id, start_date, end_date=None):
     # Set GET request parameters
@@ -92,7 +91,7 @@ def get_endpoint_json(url, id, start_date, end_date=None):
 2. Preprocesses the data so the model can use it
 
 Args:
-    start_date (datetime): start date of the query, in UTC
+    start_date (datetime): start date of the query, in UTC. Starts at midnight
     end_date (datetime, optional): end date of the query. Set 24 hours after the start date by default
 Returns:
     pandas.DataFrame Object, example below
