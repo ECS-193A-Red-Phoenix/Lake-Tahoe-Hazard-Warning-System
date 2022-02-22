@@ -17,8 +17,8 @@ Example Usage:
 >>> drs.retrieve()
 """
 
-from aws import get_model_historical_data
-from nws import get_model_forecast_data
+from dataretrieval.aws import get_model_historical_data
+from dataretrieval.nws import get_model_forecast_data
 import datetime
 import pandas as pd
 import os
