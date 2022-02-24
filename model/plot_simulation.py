@@ -56,10 +56,17 @@ class DynamicPlot:
 h_plane = HPlane_Si3dToPython(h_plane_file, dx)
 xg = h_plane['xg']
 yg = h_plane['yg']
+# Convert C to F
+h_plane['T'] *= 9 / 5 
+h_plane['T'] += 32
+# Convert m/s to inches/sec
+h_plane['u'] *= 3.28084
+h_plane['v'] *= 3.28084
+h_plane['w'] *= 3.28084
 n_rows, n_cols, n_frames = h_plane['T'].shape
 print(f"(row, cols, n_frames) = {(n_rows, n_cols, n_frames)}")
 
-def on_plot(my_plot, frame):
+def on_plot_temp(my_plot, frame):
     z = h_plane['T'][:, :, frame]
     surface_temp = my_plot.ax.pcolormesh(xg, yg, z, shading='gouraud', cmap='RdYlBu_r')
     my_plot.ax.set_aspect('equal')
@@ -72,7 +79,50 @@ def on_plot(my_plot, frame):
     my_plot.cax = plt.axes([0.7, 0.125, 0.02, 0.75])
     my_plot.cbar = my_plot.fig.colorbar(surface_temp, cax=my_plot.cax)
     my_plot.cbar.ax.tick_params(labelsize=9)
-    my_plot.ax.text(0.8, 0.5, "° Celsius", transform=my_plot.fig.transFigure)
+    my_plot.ax.text(0.8, 0.5, "° F", transform=my_plot.fig.transFigure)
 
-tmp_plot = DynamicPlot(on_plot, 0, n_frames - 1, 7, 1, 'Frame #')
-tmp_plot.show()
+temp_plot = DynamicPlot(on_plot_temp, 0, n_frames - 1, 7, 1, 'Frame #')
+temp_plot.show()
+
+cbar = surface_flow = None
+def on_plot_current(my_plot, frame):
+    global cbar, surface_flow
+    if cbar is not None or surface_flow is not None:
+        cbar.remove()
+        surface_flow.remove()
+
+    u = h_plane['u'][:, :, frame]
+    v = h_plane['v'][:, :, frame]
+    w = h_plane['w'][:, :, frame]
+    magnitude = (u**2 + v**2 + w**2)**0.5
+    surface_flow = my_plot.ax.quiver(xg, yg, u, v, magnitude, cmap='Spectral_r', 
+        scale=4, scale_units='inches', headwidth=3, headlength=5, headaxislength=10, width=0.008)
+
+    cax = plt.axes([0.7, 0.125, 0.02, 0.75])
+    cbar = my_plot.fig.colorbar(surface_flow, cax=cax)
+    cbar.ax.tick_params(labelsize=9)
+    
+    timestamp = h_plane['time'][frame]
+    my_plot.fig.suptitle(timestamp + ":00")
+    my_plot.ax.set_aspect('equal')
+    my_plot.ax.axis('off')
+
+# flow_plot = DynamicPlot(on_plot_current, 0, n_frames - 1, 7, 1, 'Frame #')
+# flow_plot.show()
+
+
+##############################################################
+# Export a specific frame of the flow map for testing purposes
+##############################################################
+
+# import json
+# o = []
+# for vmap in [h_plane['u'][:, :, 34], h_plane['v'][:, :, 34]]:
+#     new_map = [[0 for i in range(n_cols)] for j in range(n_rows)]
+#     for row in range(n_rows):
+#         for col in range(n_cols):
+#             new_map[row][col] = "nan" if np.isnan(vmap[row, col]) else vmap[row, col]
+#     o.append(new_map)
+
+# with open("slice.txt", "w") as file:
+#     file.write(json.dumps(o))
