@@ -160,8 +160,12 @@ def HPlane_Si3dToPython(h_plane_file, dx):
     output['vg'] = vg
     output['wg'] = wg
     output['Tg'] = Tg
-
-
+    output['T'] = T
+    output['x'] = x
+    output['y'] = y
+    output['u'] = u
+    output['v'] = v
+    output['w'] = w
 
     fid.close()
 
