@@ -57,17 +57,17 @@ h_plane = HPlane_Si3dToPython(h_plane_file, dx)
 xg = h_plane['xg']
 yg = h_plane['yg']
 # Convert C to F
-h_plane['T'] *= 9 / 5 
-h_plane['T'] += 32
+h_plane['Tg'] *= 9 / 5 
+h_plane['Tg'] += 32
 # Convert m/s to inches/sec
-h_plane['u'] *= 3.28084
-h_plane['v'] *= 3.28084
-h_plane['w'] *= 3.28084
-n_rows, n_cols, n_frames = h_plane['T'].shape
+h_plane['ug'] *= 3.28084
+h_plane['vg'] *= 3.28084
+h_plane['wg'] *= 3.28084
+n_rows, n_cols, n_frames = h_plane['Tg'].shape
 print(f"(row, cols, n_frames) = {(n_rows, n_cols, n_frames)}")
 
 def on_plot_temp(my_plot, frame):
-    z = h_plane['T'][:, :, frame]
+    z = h_plane['Tg'][:, :, frame]
     surface_temp = my_plot.ax.pcolormesh(xg, yg, z, shading='gouraud', cmap='RdYlBu_r')
     my_plot.ax.set_aspect('equal')
     my_plot.ax.axis('off')
@@ -91,9 +91,9 @@ def on_plot_current(my_plot, frame):
         cbar.remove()
         surface_flow.remove()
 
-    u = h_plane['u'][:, :, frame]
-    v = h_plane['v'][:, :, frame]
-    w = h_plane['w'][:, :, frame]
+    u = h_plane['ug'][:, :, frame]
+    v = h_plane['vg'][:, :, frame]
+    w = h_plane['wg'][:, :, frame]
     magnitude = (u**2 + v**2 + w**2)**0.5
     surface_flow = my_plot.ax.quiver(xg, yg, u, v, magnitude, cmap='Spectral_r', 
         scale=4, scale_units='inches', headwidth=3, headlength=5, headaxislength=10, width=0.008)
@@ -107,8 +107,8 @@ def on_plot_current(my_plot, frame):
     my_plot.ax.set_aspect('equal')
     my_plot.ax.axis('off')
 
-# flow_plot = DynamicPlot(on_plot_current, 0, n_frames - 1, 7, 1, 'Frame #')
-# flow_plot.show()
+flow_plot = DynamicPlot(on_plot_current, 0, n_frames - 1, 7, 1, 'Frame #')
+flow_plot.show()
 
 
 ##############################################################
@@ -117,7 +117,7 @@ def on_plot_current(my_plot, frame):
 
 # import json
 # o = []
-# for vmap in [h_plane['u'][:, :, 34], h_plane['v'][:, :, 34]]:
+# for vmap in [h_plane['ug'][:, :, 34], h_plane['vg'][:, :, 34]]:
 #     new_map = [[0 for i in range(n_cols)] for j in range(n_rows)]
 #     for row in range(n_rows):
 #         for col in range(n_cols):

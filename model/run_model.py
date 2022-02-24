@@ -28,7 +28,6 @@ run_model()
 
 
 import subprocess
-from model.HPlane_Si3DtoPython import HPlane_Si3dToPython
 
 MODEL_DIR = './model/SampleModel/'
 MODEL_NAME = './psi3d'

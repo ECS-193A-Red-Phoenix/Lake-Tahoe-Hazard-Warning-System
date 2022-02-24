@@ -1,5 +1,5 @@
 from matplotlib import pyplot as plt
-from model.HPlane_Si3DtoPython import HPlane_Si3dToPython
+from HPlane_Si3DtoPython import HPlane_Si3dToPython
 import time
 import os
 import sys
@@ -21,7 +21,7 @@ def create_output_maps():
         print("Exiting program")
         sys.exit(0)
     h_plane = HPlane_Si3dToPython(H_PLANE_PATH, DX)
-    n_rows, n_cols, n_frames = h_plane['T'].shape
+    n_rows, n_cols, n_frames = h_plane['Tg'].shape
     print("Found h plane file")
     print(f"Map dimensions (row, cols, n_frames) = {(n_rows, n_cols, n_frames)}")
 
@@ -50,9 +50,9 @@ def create_output_maps():
             cbar.remove()
             surface_flow.remove()
 
-        u = h_plane['u'][:, :, idx]
-        v = h_plane['v'][:, :, idx]
-        w = h_plane['w'][:, :, idx]
+        u = h_plane['ug'][:, :, idx]
+        v = h_plane['vg'][:, :, idx]
+        w = h_plane['wg'][:, :, idx]
         magnitude = (u**2 + v**2 + w**2)**0.5
         surface_flow = ax.quiver(xg, yg, u, v, magnitude, cmap='Spectral_r', 
             scale=4, scale_units='inches', headwidth=3, headlength=5, headaxislength=10, width=0.008)
@@ -82,7 +82,7 @@ def create_output_maps():
     yg = h_plane['yg']
     cbar = temp_map = None
     for idx, timestamp in enumerate(h_plane['time']):
-        z = h_plane['T'][:, :, idx]
+        z = h_plane['Tg'][:, :, idx]
         # Remove previous plot for efficient rerender
         if cbar is not None or temp_map is not None:
             cbar.remove()
@@ -107,3 +107,7 @@ def create_output_maps():
     end_time = time.time()
     print(f"Completed all tasks in {(end_time - start_time):.2f} seconds")
     print(f"Created {n_frames} flow maps from {h_plane['time'][0]} to {h_plane['time'][-1]}")
+
+
+if __name__ == '__main__':
+    create_output_maps()
