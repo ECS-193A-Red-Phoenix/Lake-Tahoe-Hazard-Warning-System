@@ -1,0 +1,1 @@
+rm -f ./plane_* ptrack_hydro.bnr tf*_*.txt section_* tracer_* nbofile* ScalarBalance.txt si3d_log.txt si3d_out.txt
