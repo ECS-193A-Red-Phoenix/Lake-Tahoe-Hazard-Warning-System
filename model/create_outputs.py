@@ -6,7 +6,7 @@ import sys
 
 ##############################################################
 # User Config
-OUTPUT_DIR = "./outputs/"                     # Output file directory
+OUTPUT_DIR = "./model/outputs/"                     # Output file directory
 H_PLANE_PATH = "./model/psi3d/plane_2"        # Path to model output file
 DX = 200                                      # idx parameter from simulation
 ##############################################################

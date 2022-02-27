@@ -1,11 +1,11 @@
-from HPlane_Si3DtoPython import HPlane_Si3dToPython
+from model.HPlane_Si3DtoPython import HPlane_Si3dToPython
 import numpy as np
 import os
 
 ##############################################################
 # User Config
-OUTPUT_DIR = "./outputs/"                     # Output file directory
-H_PLANE_PATH = "./psi3d/plane_2"        # Path to model output file
+OUTPUT_DIR = "./model/outputs/"                     # Output file directory
+H_PLANE_PATH = "./model/psi3d/plane_2"        # Path to model output file
 DX = 200                                      # idx parameter from simulation
 FLOW_DIR = "flow/"
 TEMPERATURE_DIR = "temperature/"
