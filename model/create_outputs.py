@@ -1,5 +1,5 @@
 from matplotlib import pyplot as plt
-from HPlane_Si3DtoPython import HPlane_Si3dToPython
+from .HPlane_Si3DtoPython import HPlane_Si3dToPython
 import time
 import os
 import sys

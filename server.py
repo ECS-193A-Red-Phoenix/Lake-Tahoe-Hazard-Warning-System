@@ -26,7 +26,7 @@ def run_si3d_workflow():
     print(f"[DataRetrievalService]: Starting si3d workflow at {format_date(start)}")
 
     drs.retrieve()
-    drs.create_si3d_surfbc(MODEL_DIR)
+    drs.create_si3d_surfbc(f"{MODEL_DIR}/surfbc.txt", start)
     run_si3d()
     create_output_maps()
 

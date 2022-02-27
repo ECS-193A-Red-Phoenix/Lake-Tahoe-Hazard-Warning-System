@@ -29,7 +29,7 @@ run_model()
 
 import subprocess
 
-MODEL_DIR = './model/SampleModel/'
+MODEL_DIR = './model/psi3d'
 MODEL_NAME = './psi3d'
 
 def run_si3d(verbose=True):
