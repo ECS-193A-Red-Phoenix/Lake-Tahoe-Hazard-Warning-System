@@ -10,12 +10,12 @@ hour         !    0000            !
 -------------------------------------------------------
 Space-time domains, cell size & time steps  
 -------------------------------------------------------
-xl           !    20800.          ! Length of domain (m) in EW direction
-yl           !    35200.          !   "    "    "    (m) in NS       "
+xl           !    20400.          ! Length of domain (m) in EW direction
+yl           !    34800.          !   "    "    "    (m) in NS       "
 zl           !     504.0          !   "    "    "    (m) in vertical
-tl           !    84600.          ! Length of time (s) simulated (61d)
-idx          !     800.0          ! Cell size (m) in EW direction
-idy          !     800.0          ! Cell size (m) in NS direction
+tl           !   864000.          ! Length of time (s) simulated (10d)
+idx          !     200.0          ! Cell size (m) in EW direction
+idy          !     200.0          ! Cell size (m) in NS direction
 idz          !       5.0          ! Cell size (m) in vertical
 dzmin        !       1.0          ! Min. cell size (m) in vertical
 datadj       !       0.0          ! Adjustment of datum by default datum = 0.0
@@ -54,9 +54,11 @@ nth          !        8           ! Number of processors used in parallelization
 Output specifications for time files (individual nodes)
 -------------------------------------------------------  
  ipt         !       360          ! No. of time step between consecutive output to time file  (2h)
- nnodes      !        1           ! ASN ASS TB MK GB
- inodes      !   23
- inodes      !    5
+ nnodes      !        14          ! ASN ASS TB MK GB
+ inodes      !   59   31   98    3   27  101   12   42   89   70  
+ inodes      !   69   41   41   82
+ jnodes      !    4  138   88   86   40  150  130  167   11  124
+ jnodes      !   99   98  123  101
 -------------------------------------------------------
 Output specifications for H-plane files (plot in matlab with LoadPlotSheetFile3L)
 -------------------------------------------------------

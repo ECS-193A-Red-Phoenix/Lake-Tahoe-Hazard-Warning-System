@@ -1,13 +1,13 @@
 LAKE TAHOE ECOMODELING R1 -----------------------------                         
-Run number = 202201272218,  Start date of run:   4/13/2018 at 0000 hours
+Run number = 202203022056,  Start date of run:   4/13/2018 at 0000 hours
 
- xl=     20800.0
- yl=     35200.0
+ xl=     20400.0
+ yl=     34800.0
  zl=     504.000
- idx=    800.000
- idy=    800.000
+ idx=    200.000
+ idy=    200.000
  idz=      5.000
- tl=     50.    
+ tl=    0.86E+06
  idt=    10.    
  dzmin=     1.00
  zeta0=     0.00
@@ -41,77 +41,125 @@ Run number = 202201272218,  Start date of run:   4/13/2018 at 0000 hours
 
 **Enter nspcg   n =      1
 
- cg  has converged in     3 iterations
+ cg  has converged in     6 iterations
 **Exit nspcg    n =      1
 **Enter nspcg   n =      1
 
- cg  has converged in     3 iterations
+ cg  has converged in     6 iterations
 **Exit nspcg    n =      1
 **Enter nspcg   n =      1
 
- cg  has converged in     3 iterations
+ cg  has converged in     6 iterations
 **Exit nspcg    n =      1
 **Enter nspcg   n =      2
 
- cg  has converged in     4 iterations
+ cg  has converged in     9 iterations
 **Exit nspcg    n =      2
 **Enter nspcg   n =      2
 
- cg  has converged in     3 iterations
+ cg  has converged in     5 iterations
 **Exit nspcg    n =      2
 **Enter nspcg   n =      2
 
- cg  has converged in     3 iterations
+ cg  has converged in     5 iterations
 **Exit nspcg    n =      2
 **Enter nspcg   n =      2
 
- cg  has converged in     3 iterations
+ cg  has converged in     5 iterations
 **Exit nspcg    n =      2
 **Enter nspcg   n =      3
 
- cg  has converged in     4 iterations
+ cg  has converged in     8 iterations
 **Exit nspcg    n =      3
 **Enter nspcg   n =      3
 
- cg  has converged in     3 iterations
+ cg  has converged in     5 iterations
 **Exit nspcg    n =      3
 **Enter nspcg   n =      3
 
- cg  has converged in     3 iterations
+ cg  has converged in     5 iterations
 **Exit nspcg    n =      3
 **Enter nspcg   n =      3
 
- cg  has converged in     3 iterations
+ cg  has converged in     5 iterations
 **Exit nspcg    n =      3
 **Enter nspcg   n =      4
 
- cg  has converged in     4 iterations
+ cg  has converged in     8 iterations
 **Exit nspcg    n =      4
 **Enter nspcg   n =      4
 
- cg  has converged in     3 iterations
+ cg  has converged in     5 iterations
 **Exit nspcg    n =      4
 **Enter nspcg   n =      4
 
- cg  has converged in     3 iterations
+ cg  has converged in     5 iterations
 **Exit nspcg    n =      4
 **Enter nspcg   n =      4
 
- cg  has converged in     3 iterations
+ cg  has converged in     5 iterations
 **Exit nspcg    n =      4
 **Enter nspcg   n =      5
 
- cg  has converged in     4 iterations
+ cg  has converged in     8 iterations
 **Exit nspcg    n =      5
 **Enter nspcg   n =      5
 
- cg  has converged in     3 iterations
+ cg  has converged in     5 iterations
 **Exit nspcg    n =      5
 **Enter nspcg   n =      5
 
- cg  has converged in     3 iterations
+ cg  has converged in     5 iterations
 **Exit nspcg    n =      5
 **Enter nspcg   n =      5
 
- cg  has converged in     3 iterations
+ cg  has converged in     5 iterations
 **Exit nspcg    n =      5
+**Enter nspcg   n =      6
+
+ cg  has converged in     8 iterations
+**Exit nspcg    n =      6
+**Enter nspcg   n =      6
+
+ cg  has converged in     5 iterations
+**Exit nspcg    n =      6
+**Enter nspcg   n =      6
+
+ cg  has converged in     5 iterations
+**Exit nspcg    n =      6
+**Enter nspcg   n =      6
+
+ cg  has converged in     5 iterations
+**Exit nspcg    n =      6
+**Enter nspcg   n =      7
+
+ cg  has converged in     8 iterations
+**Exit nspcg    n =      7
+**Enter nspcg   n =      7
+
+ cg  has converged in     5 iterations
+**Exit nspcg    n =      7
+**Enter nspcg   n =      7
+
+ cg  has converged in     5 iterations
+**Exit nspcg    n =      7
+**Enter nspcg   n =      7
+
+ cg  has converged in     5 iterations
+**Exit nspcg    n =      7
+**Enter nspcg   n =      8
+
+ cg  has converged in     8 iterations
+**Exit nspcg    n =      8
+**Enter nspcg   n =      8
+
+ cg  has converged in     5 iterations
+**Exit nspcg    n =      8
+**Enter nspcg   n =      8
+
+ cg  has converged in     5 iterations
+**Exit nspcg    n =      8
+**Enter nspcg   n =      8
+
+ cg  has converged in     5 iterations
+**Exit nspcg    n =      8
