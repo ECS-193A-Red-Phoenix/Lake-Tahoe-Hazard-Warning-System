@@ -81,8 +81,19 @@ def on_plot_temp(my_plot, frame):
     my_plot.cbar.ax.tick_params(labelsize=9)
     my_plot.ax.text(0.8, 0.5, "° F", transform=my_plot.fig.transFigure)
 
-temp_plot = DynamicPlot(on_plot_temp, 0, n_frames - 1, 7, 1, 'Frame #')
-temp_plot.show()
+# temp_plot = DynamicPlot(on_plot_temp, 0, n_frames - 1, 7, 1, 'Frame #')
+# temp_plot.show()
+
+def on_plot_temp_dist(my_plot, frame):
+    z = h_plane['Tg'][:, :, frame]
+    z = z.flatten()
+    z = z[~np.isnan(z)]
+
+    my_plot.ax.hist(z, bins=30)
+    return
+
+# dist_plot = DynamicPlot(on_plot_temp_dist, 0, n_frames - 1, 7, 1, 'Frame #')
+# dist_plot.show()
 
 cbar = surface_flow = None
 def on_plot_current(my_plot, frame):
@@ -107,22 +118,38 @@ def on_plot_current(my_plot, frame):
     my_plot.ax.set_aspect('equal')
     my_plot.ax.axis('off')
 
-flow_plot = DynamicPlot(on_plot_current, 0, n_frames - 1, 7, 1, 'Frame #')
-flow_plot.show()
+# flow_plot = DynamicPlot(on_plot_current, 0, n_frames - 1, 7, 1, 'Frame #')
+# flow_plot.show()
 
 
 ##############################################################
-# Export a specific frame of the flow map for testing purposes
+# Export a specific frame(s) of the maps for testing purposes
 ##############################################################
 
-# import json
-# o = []
-# for vmap in [h_plane['ug'][:, :, 34], h_plane['vg'][:, :, 34]]:
-#     new_map = [[0 for i in range(n_cols)] for j in range(n_rows)]
-#     for row in range(n_rows):
-#         for col in range(n_cols):
-#             new_map[row][col] = "nan" if np.isnan(vmap[row, col]) else vmap[row, col]
-#     o.append(new_map)
+import json
+from collections import defaultdict
 
-# with open("slice.txt", "w") as file:
-#     file.write(json.dumps(o))
+frames_to_export = 24
+frame_number = 21
+export = 'temperature' # 'flow'
+
+frames_json = []
+for frame in range(frame_number, frame_number + frames_to_export):
+    frame_time = h_plane['time'][frame]
+    if export == 'temperature':
+        frame_export = [h_plane['Tg'][:, :, frame]]
+    elif export == 'flow':
+        frame_export = [h_plane['ug'][:, :, frame], h_plane['vg'][:, :, frame]]     
+
+    frame_object = {"time": frame_time, "matrices": []}
+
+    for vmap in frame_export:
+        new_map = [[0 for i in range(n_cols)] for j in range(n_rows)]
+        for row in range(n_rows):
+            for col in range(n_cols):
+                new_map[row][col] = "nan" if np.isnan(vmap[row, col]) else vmap[row, col]
+        frame_object['matrices'].append(new_map)
+    frames_json.append(frame_object)
+
+with open(f"{export}.json", "w") as file:
+    file.write(json.dumps(frames_json))
