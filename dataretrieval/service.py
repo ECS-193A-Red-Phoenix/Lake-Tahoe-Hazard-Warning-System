@@ -96,7 +96,7 @@ class DataRetrievalService:
             n_points = ((end_date - start_date) // interval_time) + 1
             file.write("Surface boundary condition file for si3d model\n")
             file.write(f"Lake Tahoe Data (file created on {format_date(today)}) (UTC)\n")
-            file.write(f"Time is given 10 minute intervals in hours from {format_date(start_date)} (UTC)\n")
+            file.write(f"Time is given 10 minute intervals in hours starting from {format_date(start_date)} (UTC) and ending at {format_date(end_date)} (UTC)\n")
             file.write("Data format is (10X,G11.2,...)\n")
             file.write("columns=[ time  attenuation coefficient  shortwave  air temp  atmospheric pressure   relative humidity  longwave  wind drag coefficient  wind u  wind v]\n")
             file.write("units=  [hours                   number        wm2   Celsius               Pascals            fraction       wm2                 number      ms      ms]\n")
