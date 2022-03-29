@@ -30,13 +30,12 @@ def create_output_binary():
     for idx, timestamp in enumerate(h_plane['time']):
         u = h_plane['ug'][:, :, idx]
         v = h_plane['vg'][:, :, idx]
-        w = h_plane['wg'][:, :, idx]
-        uvw = np.array([u, v, w])
-        np.save(OUTPUT_DIR + FLOW_DIR + timestamp + '.npy', uvw)
+        uv = np.array([u, v])
+        np.save(OUTPUT_DIR + FLOW_DIR + timestamp + '.npy', uv)
 
         t = h_plane['Tg'][:, :, idx]
         np.save(OUTPUT_DIR + TEMPERATURE_DIR + timestamp + '.npy', t)
-        print("Saved uvw and temperature at " + timestamp)
+        print("Saved uv and temperature at " + timestamp)
 
 
 if __name__ == '__main__':
