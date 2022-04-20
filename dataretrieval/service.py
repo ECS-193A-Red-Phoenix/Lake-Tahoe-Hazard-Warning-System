@@ -24,11 +24,12 @@ import pandas as pd
 import os
 
 class DataRetrievalService:
+    ARCHIVE_DATA = False        # if set to true, will store model inputs in a csv file
     CSV_FILE = "./database.csv"
 
     def __init__(self):
         # Use csv file as database for now
-        if os.path.isfile(self.CSV_FILE):
+        if self.ARCHIVE_DATA and os.path.isfile(self.CSV_FILE):
             self.db = pd.read_csv(self.CSV_FILE)
             self.db['time'] = pd.to_datetime(self.db['time'])
         else:
@@ -36,7 +37,7 @@ class DataRetrievalService:
 
 
     def save(self):
-        if self.db is not None:
+        if self.ARCHIVE_DATA and self.db is not None:
             self.db.to_csv(self.CSV_FILE, index=False)
 
 
