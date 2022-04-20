@@ -44,8 +44,13 @@ def get_endpoint_json(url, id, start_date, end_date=None):
         params['rptend'] = format_date(end_date)
 
     # Send request and return data in JSON format
-    response = requests.get(url, params=params).json()
-    return response
+    response = requests.get(url, params=params)
+
+    response_json = response.json()
+    if response_json is None or len(response_json) == 0:
+        raise Exception(f"AWS endpoint failed: {response.url}")
+
+    return response_json
 
 """
 1. Retrieves Lake Tahoe data from AWS
