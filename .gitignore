@@ -7,3 +7,4 @@ outputs
 database.csv
 ptrack_hydro.bnr
 model/psi3d/tf*
+scripts/*
