@@ -3,7 +3,6 @@ venv.sh
 __pycache__
 .vscode
 .test
-outputs
 database.csv
 ptrack_hydro.bnr
 model/psi3d/tf*
