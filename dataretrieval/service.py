@@ -54,7 +54,7 @@ class DataRetrievalService:
         combined_data = pd.concat([
             aws_data,
             nws_data[nws_data['time'] > most_recent_aws_date]
-        ])
+        ], ignore_index=True)
 
         if self.db is None:
             self.db = combined_data
