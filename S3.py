@@ -61,31 +61,33 @@ class S3:
 
         return False, {"message": "failed"}
 
-    @staticmethod
     def getContents(self) -> Dict[str, List[str]]:
         # check if contents.json exists
         key: str = "contents.json"
         result: Dict[str, str] = self.__client.list_objects_v2(Bucket=self.__bucketName, Prefix=key)
 
-        print(result)
+        self.prettyPrint(result, title="Key Bucket Query Result:")
 
         contentsJSON: Dict[str, List[str]] = None
-        prefixPath = "./tmp"
+        prefixPath = "./outputs"
         fileLocation = f"{prefixPath}/{key}"
 
         if 'Contents' in result:
             print(f"{key} exists in the bucket.")
-            # retreive contents.json
 
+            # retreive contents.json
             self.__client.download_file(
                 self.__bucketName,  # 'BUCKET_NAME'
                 key,  # 'OBJECT_NAME'
                 fileLocation  # 'FILE_NAME' destination to download file to
             )
-
-            contentsJSON = json.load(f"{prefixPath}/{key}")
+            
+            # load file into a json object
+            f = open(fileLocation)
+            contentsJSON = json.load(f)
         else:
             print(f"{key} doesn't exist in the bucket.")
+
             # if it doesn't make a contents.json for the first time and insert to bucket
             contentsJSON = self.__createContents()
 
@@ -97,7 +99,6 @@ class S3:
             self.__insertToBucket(localFilePath=fileLocation, fileName=key)
 
         # return contents.json after parsing into Dict[str, List[str]]
-        print(contentsJSON)
         return contentsJSON
 
     def __createContents(self) -> Dict[str, List[str]]:
@@ -112,17 +113,29 @@ class S3:
     def deleteObject(self, objKey):
         self.__client.delete(Bucket=self.__bucketName, Key=objKey)
 
-    def getAllFlowFiles(self) -> List[str]:
-        # return a list of filenames for objects in Flow Subdirectory
-        return os.listdir("dataretrieval/flow")
+    def getAllFlowFilesFromDRS(self) -> List[str]:
+        # return a list of filenames for objects in Flow Subdirectory in DRS
+        return os.listdir(f"{self.__cwd}/outputs/flow")
 
-    def getAllTemperatureFiles(self) -> List[str]:
-        # return a list of filenames for objects in Temperature Subdirectory
-        return os.listdir("dataretrieval/temperature")
+    def getAllTemperatureFilesFromDRS(self) -> List[str]:
+        # return a list of filenames for objects in Temperature Subdirectory in DRS
+        return os.listdir(f"{self.__cwd}/outputs/temperature")
+
+    def prettyPrint(self, obj: Dict[str, Union[str, List[str]]], title: str = "MAP:") -> None:
+        print()
+        print(title)
+        for k, v in obj.items():
+            print(f"{k} -> {v}")
+            print()
+        print()
+        return None
+
+    
 
 
-# for testing purposes
+# for testing purposes and debugging purposes
 if __name__ == "__main__":
     s3 = S3()
     response = s3.getContents()
-    print(response)
+    s3.prettyPrint(response, title="Contents.json: ")
+

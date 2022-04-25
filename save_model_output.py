@@ -30,5 +30,11 @@ def save_model_output():
                 # Finished with file
                 file.close()
 
+
+def flowTemperaturePicker(directoryPath: str) -> str:
+    # returns the lowest directory in path
+    lastDirectoryIndex: int = directoryPath.rfind("/")
+    return directoryPath[lastDirectoryIndex + 1:]
+
 if __name__ == '__main__':
     save_model_output()
