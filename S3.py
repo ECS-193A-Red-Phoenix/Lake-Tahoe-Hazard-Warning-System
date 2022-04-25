@@ -6,6 +6,7 @@ from typing import Union, Dict, List
 from pathlib import Path
 import credentials
 
+import os
 
 class S3:
 
@@ -109,11 +110,11 @@ class S3:
 
     def getAllFlowFiles(self) -> List[str]:
         # return a list of filenames for objects in Flow Subdirectory
-        pass
+        return os.listdir("dataretrieval/flow")
 
     def getAllTemperatureFiles(self) -> List[str]:
         # return a list of filenames for objects in Temperature Subdirectory
-        pass
+        return os.listdir("dataretrieval/temperature")
 
 
 # for testing purposes
