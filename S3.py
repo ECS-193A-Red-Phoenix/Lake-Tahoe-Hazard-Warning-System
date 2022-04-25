@@ -108,6 +108,10 @@ class S3:
 
         return contents
 
+    # TODO: not sure how to check if the request failed
+    def deleteObject(self, objKey):
+        self.__client.delete(Bucket=self.__bucketName, Key=objKey)
+
     def getAllFlowFiles(self) -> List[str]:
         # return a list of filenames for objects in Flow Subdirectory
         return os.listdir("dataretrieval/flow")
