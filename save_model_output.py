@@ -2,12 +2,17 @@ import os
 import datetime
 import requests
 import time
+import boto3
 
 OUTPUT_DIRS = ["./model/outputs/flow", "./model/outputs/temperature"]
 BACKEND_URL = "http://127.0.0.1:8000/input_to_db"
 
 def save_model_output():
     today = datetime.datetime.now(datetime.timezone.utc)
+
+    # S3 bucket
+    s3 = boto3.resource("s3")
+    bucket = s3.Bucket("lake-tahoe-conditions")
 
     # TODO: possibly zip these files so we only need to send one request
     for dir in OUTPUT_DIRS:
@@ -18,17 +23,16 @@ def save_model_output():
             # Sets timezone to UTC without affecting other values
             file_date = file_date.replace(tzinfo=datetime.timezone.utc)
             if file_date > today:
-                # Read and send file
-                file = open(f"{dir}/{filename}", mode="rb")
-                data = file.read()
-                response = requests.post(BACKEND_URL, files={
-                    "file": data,
-                })
+                # Determine object key
+                if dir.endswith("flow"):
+                    objKey = f"flow/{filename}"
+                else:
+                    objKey = f"temperature/{filename}"
 
-                print(f"Response code: {response}")
-
-                # Finished with file
-                file.close()
+                # Upload file to s3
+                filePath = f"{dir}/{filename}"
+                # TODO: handle upload errors
+                bucket.upload_file(filePath, objKey)
 
 if __name__ == '__main__':
     save_model_output()
