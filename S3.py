@@ -103,8 +103,8 @@ class S3:
 
     def __createContents(self) -> Dict[str, List[str]]:
         contents = {
-            "flow": self.getAllFlowFiles(),
-            "temperature": self.getAllTemperatureFiles()
+            "flow": self.getAllFlowFilesFromBucket(),
+            "temperature": self.getAllTemperatureFilesFromBucket()
         }
 
         return contents
@@ -121,7 +121,31 @@ class S3:
         # return a list of filenames for objects in Temperature Subdirectory in DRS
         return os.listdir(f"{self.__cwd}/outputs/temperature")
 
+    def getAllFlowFilesFromBucket(self) -> List[str]:
+        # return a list of filenames for objects in Flow Subdirectory in Bucket
+        return self.getObjectsByKey("flow")
+
+    def getAllTemperatureFilesFromBucket(self) -> List[str]:
+        # return a list of filenames for objects in Temperature Subdirectory in Bucket
+        return self.getObjectsByKey("temperature")
+
+    def getObjectsByKey(self, key: str) -> List[str]:
+        # gets all the objects with the matching prefix(inputted key)
+        objectsInBucket = []
+        response = self.__client.list_objects_v2(Bucket=self.__bucketName)
+        for obj in response['Contents']:
+            objName = obj["Key"]
+            index = objName.find("/")
+            if index == -1:  # index is not found
+                continue
+            dirName = objName[:index]  
+            fileName = objName[index + 1:]
+            if dirName == key:
+                objectsInBucket.append(fileName)
+        return objectsInBucket
+
     def prettyPrint(self, obj: Dict[str, Union[str, List[str]]], title: str = "MAP:") -> None:
+        # prints map neatly for debugging
         print()
         print(title)
         for k, v in obj.items():
@@ -130,12 +154,27 @@ class S3:
         print()
         return None
 
-    
-
+    def prettyPrintArray(self, arr: List[str], title: str = "Array: ") -> None:
+        # prints array neatly for debugging
+        print()
+        print(title)
+        print()
+        for v in arr:
+            print(v)
+        print()
+        return None
 
 # for testing purposes and debugging purposes
+"""
 if __name__ == "__main__":
     s3 = S3()
+
     response = s3.getContents()
     s3.prettyPrint(response, title="Contents.json: ")
 
+    s3.prettyPrintArray(s3.getObjectsByKey("flow"), title="flow")
+    print("=============================")
+    s3.prettyPrintArray(s3.getObjectsByKey("temperature"), title="temperature")
+    print("=============================")
+    s3.prettyPrintArray(s3.getObjectsByKey("waveheight"), title="waveheight")
+"""
