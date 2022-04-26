@@ -29,7 +29,7 @@ def save_model_output():
                 objType = "temperature"
             objKey = f"{objType}/{fileName}"
 
-            print(f"Uploading {fileName}...", end="", flush=True)
+            print(f"Uploading {objKey}...", end="", flush=True)
 
             try:
                 bucket.upload_file(localFilePath, objKey)
