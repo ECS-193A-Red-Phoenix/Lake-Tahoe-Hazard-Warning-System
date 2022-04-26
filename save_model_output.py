@@ -19,10 +19,7 @@ def save_model_output():
             # TODO: use PST to avoid confusion?
             fileDate = fileDate.replace(tzinfo=datetime.timezone.utc)
             if fileDate <= today:
-                print(f"Skipping {fileName}")
                 continue
-
-            print(f"Uploading {fileName}...", end="", flush=True)
 
             # Upload new prediction to S3
             localFilePath = f"{dir}/{fileName}"
@@ -31,37 +28,47 @@ def save_model_output():
             else:
                 objType = "temperature"
             objKey = f"{objType}/{fileName}"
-            # TODO: handle upload errors
-            bucket.upload_file(localFilePath, objKey)
 
-            # Update contents.json in S3
-            objs = bucket.objects.all()
-            objKeys = [obj.key for obj in objs]
-            if "contents.json" not in objKeys:
-                # Create new contents if it doesn't exist
-                contents = {
-                    "flow": [],
-                    "temperature": []
-                }
-            else:
-                # Load existing contents from S3
-                with open("contents.json", "wb+") as contentsFileObj:
-                    bucket.download_fileobj("contents.json", contentsFileObj)
-                    contentsFileObj.seek(0)
-                    contents = json.load(contentsFileObj)
+            print(f"Uploading {fileName}...", end="", flush=True)
 
-            # Update contents
-            contents[objType].append(fileName)
+            try:
+                bucket.upload_file(localFilePath, objKey)
 
-            # Save and upload new contents file
-            with open("contents.json", "w+") as contentsFileObj:
-                json.dump(contents, contentsFileObj)
+                # Update contents.json in S3
+                objs = bucket.objects.all()
+                objKeys = [obj.key for obj in objs]
+                if "contents.json" not in objKeys:
+                    # Create new contents if it doesn't exist
+                    contents = {
+                        "flow": [],
+                        "temperature": []
+                    }
+                else:
+                    # Load existing contents from S3
+                    with open("contents.json", "wb+") as contentsFileObj:
+                        bucket.download_fileobj("contents.json", contentsFileObj)
+                        contentsFileObj.seek(0)
+                        contents = json.load(contentsFileObj)
 
-            with open("contents.json", "rb") as contentsFileObj:
-                bucket.upload_fileobj(contentsFileObj, "contents.json")
+                # Update contents
+                contents[objType].append(fileName)
 
-            # Don't need local copy of contents
-            os.remove("contents.json")
+                # Save and upload new contents file
+                with open("contents.json", "w+") as contentsFileObj:
+                    json.dump(contents, contentsFileObj)
+
+                with open("contents.json", "rb") as contentsFileObj:
+                    bucket.upload_fileobj(contentsFileObj, "contents.json")
+
+                # Don't need local copy of contents
+                os.remove("contents.json")
+            except Exception as e:
+                # Print any errors that occur while uploading
+                print("failed!")
+                print(e)
+                continue
+
+            # Success
             print("done.")
 
 if __name__ == '__main__':
