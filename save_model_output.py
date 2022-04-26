@@ -51,7 +51,8 @@ def save_model_output():
                         contents = json.load(contentsFileObj)
 
                 # Update contents
-                contents[objType].append(fileName)
+                if fileName not in contents[objType]:
+                    contents[objType].append(fileName)
 
                 # Save and upload new contents file
                 with open("contents.json", "w+") as contentsFileObj:
