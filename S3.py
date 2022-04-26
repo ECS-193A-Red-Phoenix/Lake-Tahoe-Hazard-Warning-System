@@ -21,7 +21,6 @@ class S3:
         self.__cwd = Path.cwd()
         return
 
-    @staticmethod
     def uploadToS3(self, localFilePath: str, fileName: str, flow: bool) -> Union[bool, Dict[str, str]]:
         key = f"flow/{fileName}" if flow else f"temperature/{fileName}"
 
