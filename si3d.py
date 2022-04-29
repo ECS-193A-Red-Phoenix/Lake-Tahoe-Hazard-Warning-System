@@ -10,6 +10,7 @@ Running this script will regularly perform this sequence of tasks
 from dataretrieval.service import DataRetrievalService
 from model.run_model import run_si3d
 from model.create_output_binary import create_output_binary
+from model.update_si3d_inp import update_si3d_inp
 from save_model_output import save_model_output
 import datetime
 
@@ -27,6 +28,9 @@ def run_si3d_workflow():
     drs.retrieve()
     drs.create_si3d_surfbc(f"{MODEL_DIR}/surfbc.txt", start)
 
+    # Update si3d_inp.txt
+    update_si3d_inp()
+
     # Run si3d model
     run_si3d()
 
@@ -34,7 +38,7 @@ def run_si3d_workflow():
     create_output_binary()
 
     # Send array files to backend server
-    save_model_output()
+    # save_model_output()
 
     end = datetime.datetime.now(datetime.timezone.utc)
     print(f"[DataRetrievalService]: Finished si3d workflow at {format_date(end)}")
