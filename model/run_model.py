@@ -3,20 +3,6 @@ The purpose of this file is to encapsulate an interface to run the hydrodynamic 
 This file provides a function that will run the hydrodynamic model. Alternatively, running 
 this file directly will run the model.
 
-Notes:
-1. run_model() will query the database for the latest weather data it has, and create
-the necessary input files for the model to run using that data
-
-2. run_model() will return a python dictionary representing the output data of the model.
-This python dictionary is structured as such:
-{
-    # Note dimensionality of arrays are (Rows, Cols, # Frames)
-    'T': numpy array of temperatures
-    'u': numpy array of East-West velocity magnitudes
-    'v': numpy array of North-South velocity magnitudes
-    'w': numpy array of Vertical velocity magnitudes
-}
-
 Example usage:
 
 ```
