@@ -125,8 +125,8 @@ def get_model_forecast_data():
 
     if 'properties' not in data:
         # API failed to return data multiple times
-        # API is most likely down, so return empty data table
-        return pd.DataFrame(columns=features)
+        # API is most likely down, so throw an Exception
+        raise Exception("National Weather Service API (NWS) is likely down. Could not retrieve forecasted weather data")
 
     nws_features = ['windDirection', 'windSpeed', 'temperature', 'skyCover', 'relativeHumidity']
     model_data = defaultdict(lambda: [nan] * len(nws_features))
@@ -156,6 +156,7 @@ def get_model_forecast_data():
     df.drop(axis=0, index=rows_with_nan, inplace=True)
 
     # Temporary shortwave formula based on historical AWS data
+    # To see this formula visit https://www.desmos.com/calculator/wawbpdxtkd
     hourize = lambda t: t.hour + t.minute / 60
     f = lambda t: 5.1276e+02 * np.exp(-9.4720e-02 * (t - 1.1238e-01)**2)
     g = lambda t: f(((hourize(t) + -10) % 24) - 10)
