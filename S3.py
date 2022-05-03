@@ -135,7 +135,7 @@ class S3:
                     continue
                 
                 print(f"Deleting {obj['Key']}...")
-                self.__client.delete_object(Bucket=self.__bucketName, Key=obj["Key"])
+                self.deleteObject(obj["Key"])
 
         # get new contents.json
         contentsJSON = self.__createContents()
