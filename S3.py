@@ -6,6 +6,8 @@ from typing import Union, Dict, List
 from pathlib import Path
 import credentials
 
+import datetime
+from datetime import timezone
 import os
 
 class S3:
@@ -52,7 +54,7 @@ class S3:
             self.__bucketName,  # s3 bucket we will be adding the file to
             Key=fileName,  # path in the s3 bucket to where the file should be stored
         )
-
+    
         if response == None:  # successful insertion into bucket
             message = {
                 "message": "successful",
@@ -113,6 +115,28 @@ class S3:
         Warning: 
         this function must be used after uploading all files to the s3 bucket
         """
+        # Remove old predictions from bucket
+        for objType in ["temperature", "flow"]:
+            response = self.__client.list_objects_v2(Bucket=self.__bucketName, Prefix=objType)
+            objs = response.get("Contents")
+
+            if objs == None:
+                # No predictions for this type
+                continue
+
+            for obj in objs:
+                # Delete predictions over 2 weeks old
+                _, fileName = obj["Key"].split('/')
+                objDate = datetime.datetime.strptime(fileName, "%Y-%m-%d %H.npy")
+                # Predictions are made in the UTC timezone
+                objDate = objDate.replace(tzinfo=timezone.utc)
+                twoWeeksAgo = datetime.datetime.now(tz=timezone.utc) - datetime.timedelta(weeks=2)
+                if objDate >= twoWeeksAgo:
+                    continue
+                
+                print(f"Deleting {obj['Key']}...")
+                self.__client.delete_object(Bucket=self.__bucketName, Key=obj["Key"])
+
         # get new contents.json
         contentsJSON = self.__createContents()
 
