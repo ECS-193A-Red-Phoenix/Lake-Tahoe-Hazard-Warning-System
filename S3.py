@@ -22,6 +22,10 @@ class S3:
         return
 
     def uploadToS3(self, localFilePath: str, fileName: str, flow: bool) -> Union[bool, Dict[str, str]]:
+        # For testing use next 2 lines
+        # testDir = "save_model_output_test/"
+        # key = f"{testDir}flow/{fileName}" if flow else f"{testDir}temperature/{fileName}"
+
         key = f"flow/{fileName}" if flow else f"temperature/{fileName}"
 
         response = self.__client.upload_file(
@@ -100,12 +104,38 @@ class S3:
         # return contents.json after parsing into Dict[str, List[str]]
         return contentsJSON
 
+    def updateContents(self) -> Union[bool, Dict[str, str]]:
+        """
+        Approach: 
+        1.) create and update contents.json
+        2.) upload back to s3 bucket
+
+        Warning: 
+        this function must be used after uploading all files to the s3 bucket
+        """
+        # get new contents.json
+        contentsJSON = self.__createContents()
+
+        prefixPath = "./outputs"
+        key = "contents.json"
+
+        fileLocation = f"{prefixPath}/{key}"
+
+        # create and store json
+        with open(fileLocation, "w") as f:
+            json.dump(contentsJSON, f)
+
+        # if testing uncomment next lines
+        # key = "save_model_output_test/contents.json"
+
+        # insert contents.json into s3 bucket
+        return self.__insertToBucket(localFilePath=fileLocation, fileName=key)
+
     def __createContents(self) -> Dict[str, List[str]]:
         contents = {
             "flow": self.getAllFlowFilesFromBucket(),
             "temperature": self.getAllTemperatureFilesFromBucket()
         }
-
         return contents
 
     # TODO: not sure how to check if the request failed
