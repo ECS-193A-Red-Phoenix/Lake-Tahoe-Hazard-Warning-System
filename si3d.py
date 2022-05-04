@@ -37,8 +37,8 @@ def run_si3d_workflow():
     # Parse model output into Numpy array files
     create_output_binary()
 
-    # Send array files to backend server
-    # save_model_output()
+    # Send array files to S3
+    save_model_output()
 
     end = datetime.datetime.now(datetime.timezone.utc)
     print(f"[DataRetrievalService]: Finished si3d workflow at {format_date(end)}")

@@ -4,8 +4,8 @@ LAKE TAHOE ECOMODELING R1 -----------------------------
 Start date and time for simulations
 -------------------------------------------------------
 year         !    2022            !
-month        !      04            !
-day          !      29            !
+month        !      05            !
+day          !      04            !
 hour         !      20            !
 -------------------------------------------------------
 Space-time domains, cell size & time steps  
