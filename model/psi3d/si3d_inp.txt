@@ -10,12 +10,12 @@ hour         !    0000            !
 -------------------------------------------------------
 Space-time domains, cell size & time steps  
 -------------------------------------------------------
-xl           !    20300.          ! Length of domain (m) in EW direction
+xl           !    20400.          ! Length of domain (m) in EW direction
 yl           !    34800.          !   "    "    "    (m) in NS       "
-zl           !     505.0          !   "    "    "    (m) in vertical
-tl           !   864000.          ! Length of time (s) simulated (10d)
-idx          !     100.0          ! Cell size (m) in EW direction
-idy          !     100.0          ! Cell size (m) in NS direction
+zl           !     504.0          !   "    "    "    (m) in vertical
+tl           !     1000.          ! Length of time (s) simulated (10d)
+idx          !     200.0          ! Cell size (m) in EW direction
+idy          !     200.0          ! Cell size (m) in NS direction
 idz          !       5.0          ! Cell size (m) in vertical
 dzmin        !       1.0          ! Min. cell size (m) in vertical
 datadj       !       0.0          ! Adjustment of datum by default datum = 0.0
@@ -49,20 +49,21 @@ cw           !     1.1E-3         ! Wind drag coefficient (only if ifsbc = 0)
 ws           !      0.00          ! Wind speed (constant in m/s) when ifsbc = 0
 phi          !    000.0           ! Wind direction (constant in degress) when ifsbc = 0
 idbg         !        0           ! 0 = no check messages 1 = check messages output for debug purposes
-nth          !       32           ! Number of processors used in parallelization
+nth          !       16           ! Number of processors used in parallelization
 -------------------------------------------------------
 Output specifications for time files (individual nodes)
 -------------------------------------------------------  
  ipt         !      360           ! No. of time step between consecutive output to time file  (2h)
- nnodes      !        8           ! ASN ASS TB MK GB
- inodes      !   10  138  137   80   81  116   60  177
- jnodes      !  177  245  195  194  243    5  275   19
+ nnodes      !        7           ! ASN ASS TB MK GB
+ inodes      !   65   69   69   40   41   58   89
+ jnodes      !  135  123   98   97  122    3   10
 -------------------------------------------------------
 Output specifications for H-plane files (plot in matlab with LoadPlotSheetFile3L)
 -------------------------------------------------------
- iht         !      360           ! No. of time step between consecutive output to plane file  (2h)
- nplanes     !        1           !
- plane 1     !        2           ! surf
+ iht         !       720          ! No. of time step between consecutive output to plane file  (2h)
+ itspfh      !         0          ! No. of time steps before first output to horizontal plane file
+ nplanes     !         1          !
+ plane 1     !         2          ! surface
 ------------------------------------------------------
 Output specifications for X-section files (plot in matlab with LoadPlotSectionFile3L)
 -------------------------------------------------------
@@ -70,12 +71,13 @@ Output specifications for X-section files (plot in matlab with LoadPlotSectionFi
 -------------------------------------------------------
 Output specifications for 3D space files
 -------------------------------------------------------
-ipxml        !      -360          ! No. of time step between consecutive output to 3D-space file (1h)
-itspf        !         0          ! No. of time steps before first output to 3D-space file
+ ipxml       !      -720          ! No. of time step between consecutive output to 3D-space file (1h)
+ itspf       !         0          ! No. of time steps before first output to 3D-space file
+ iTurbVars   !         0          ! 0 for only velocity and temperature outputs and 1 to include turbulent parameters
 -------------------------------------------------------  
 Open boundary conditions specifications 
 -------------------------------------------------------   
-nopen        !        0           ! No. of open boundaries 
+ nopen       !        0           ! No. of open boundaries 
 ------------------------------------------------------    
 Open boundary conditions for nesting procedures  
 -------------------------------------------------------     
@@ -83,9 +85,7 @@ Open boundary conditions for nesting procedures
  ------------------------------------------------------    
 Specification for tracer (other than oxygen) simulation 
 -------------------------------------------------------     
-ntr          !        1           ! No. of tracers sim.
-ecomod       !        0           !
-iotr         !      360           ! 
+ ntr         !        0           ! No. of tracers sim. 
 -------------------------------------------------------       
 Specification for oxgygenation system simulations
 -------------------------------------------------------            
