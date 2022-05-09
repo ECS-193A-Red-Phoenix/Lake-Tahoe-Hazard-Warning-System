@@ -6,14 +6,14 @@ Start date and time for simulations
 year         !    2022            ! 
 month        !       5            !
 day          !      09            !
-hour         !      03            !
+hour         !      18            !
 -------------------------------------------------------
 Space-time domains, cell size & time steps  
 -------------------------------------------------------
 xl           !    20400.          ! Length of domain (m) in EW direction
 yl           !    34800.          !   "    "    "    (m) in NS       "
 zl           !     504.0          !   "    "    "    (m) in vertical
-tl           !     1000.          ! Length of time (s) simulated (10d)
+tl           !   864000.          ! Length of time (s) simulated (10d)
 idx          !     200.0          ! Cell size (m) in EW direction
 idy          !     200.0          ! Cell size (m) in NS direction
 idz          !       5.0          ! Cell size (m) in vertical
