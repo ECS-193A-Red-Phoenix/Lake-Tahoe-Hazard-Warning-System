@@ -8,4 +8,4 @@ ptrack_hydro.bnr
 model/psi3d/tf*
 scripts/*
 credentials.py
-./outputs/
+./outputs/*
