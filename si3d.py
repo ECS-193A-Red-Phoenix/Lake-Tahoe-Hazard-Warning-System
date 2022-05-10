@@ -25,12 +25,14 @@ def run_si3d_workflow():
     start = datetime.datetime.now(datetime.timezone.utc)
     print(f"[DataRetrievalService]: Starting si3d workflow at {format_date(start)}")
 
+    model_start_date = start - datetime.timedelta(weeks=1)
+
     # Retrieve data from various API's
     drs.retrieve()
-    drs.create_si3d_surfbc(f"{MODEL_DIR}/surfbc.txt", start)
+    drs.create_si3d_surfbc(f"{MODEL_DIR}/surfbc.txt", model_start_date)
 
     # Update si3d_inp.txt
-    update_si3d_inp()
+    update_si3d_inp(model_start_date)
 
     # Run si3d model
     run_si3d()

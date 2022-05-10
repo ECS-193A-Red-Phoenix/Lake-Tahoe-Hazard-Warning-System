@@ -6,7 +6,7 @@ import S3
 OUTPUT_DIRS = ["./outputs/flow", "./outputs/temperature"]
 
 def save_model_output() -> None:
-    today = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1)
+    today = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=8)
 
     s3 = S3.S3()  # s3 client with methods specific to our needs
 

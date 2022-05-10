@@ -122,6 +122,8 @@ def get_model_forecast_data():
         if 'properties' in data:
             # API returned data successfully
             break
+        else:
+            print("get_model_forecast_data(): Failed to retrieve forecast data, trying again")
 
     if 'properties' not in data:
         # API failed to return data multiple times

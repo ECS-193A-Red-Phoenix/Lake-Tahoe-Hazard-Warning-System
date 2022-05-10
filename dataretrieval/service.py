@@ -42,11 +42,11 @@ class DataRetrievalService:
 
 
     def retrieve(self):
-        """ Retrieves data from [today - 7 days, today + 7 days], and stores it in the database,
+        """ Retrieves data from [today - 10 days, today + 7 days], and stores it in the database,
         replacing what values already exist if any.
         """
         today = datetime.datetime.now(datetime.timezone.utc)
-        last_week = today - datetime.timedelta(weeks=1)
+        last_week = today - datetime.timedelta(days=10)
         aws_data = get_model_historical_data(start_date=last_week, end_date=today)
         nws_data = get_model_forecast_data()
     
