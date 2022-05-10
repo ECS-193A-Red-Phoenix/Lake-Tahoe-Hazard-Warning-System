@@ -13,6 +13,7 @@ from model.create_output_binary import create_output_binary
 from model.update_si3d_inp import update_si3d_inp
 from save_model_output import save_model_output
 import datetime
+import os
 
 MODEL_DIR = "./model/psi3d/"
 format_date = lambda date: datetime.datetime.strftime(date, "%Y-%m-%d %H:%M:%S UTC")
@@ -43,6 +44,11 @@ def run_si3d_workflow():
     end = datetime.datetime.now(datetime.timezone.utc)
     print(f"[DataRetrievalService]: Finished si3d workflow at {format_date(end)}")
     print(f"[DataRetrievalService]: Job 'si3d workflow' took {format_duration(end - start)} to complete")
+
+    # Shutdown EC2 instance
+    # https://stackoverflow.com/a/22913651
+    # Must invoke IMDSv2 to get current instance ID for shutting down
+    os.system("aws ec2 stop-instances --instance-ids $(curl -s http://169.254.169.254/latest/meta-data/instance-id)")
 
 if __name__ == '__main__':
     run_si3d_workflow()
