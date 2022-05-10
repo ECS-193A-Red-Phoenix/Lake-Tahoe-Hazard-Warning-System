@@ -10,6 +10,10 @@ Make sure you install required python packages with
 
 `pip install -r requirements.txt`
 
+### Configuring an EC2 instance
+1. Create an EC2 instance. This is meant to be persistent.
+2. Run `aws configure` and add your AWS account credentials in order for our code to shutdown the EC2 instance.
+
 ## Running the model
 
 To start the si3d workflow, run the following:
