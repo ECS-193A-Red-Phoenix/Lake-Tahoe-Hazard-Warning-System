@@ -115,6 +115,9 @@ class S3:
         Warning: 
         this function must be used after uploading all files to the s3 bucket
         """
+
+        prefixPath = "./outputs"
+
         # Remove old predictions from bucket
         for objType in ["temperature", "flow"]:
             response = self.__client.list_objects_v2(Bucket=self.__bucketName, Prefix=objType)
@@ -136,11 +139,13 @@ class S3:
                 
                 print(f"Deleting {obj['Key']}...")
                 self.deleteObject(obj["Key"])
+                
+                # Delete local copy of old prediction
+                os.remove(f"{prefixPath}/{obj['Key']}")
 
         # get new contents.json
         contentsJSON = self.__createContents()
 
-        prefixPath = "./outputs"
         key = "contents.json"
 
         fileLocation = f"{prefixPath}/{key}"
