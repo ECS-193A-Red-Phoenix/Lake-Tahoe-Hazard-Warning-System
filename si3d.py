@@ -27,30 +27,34 @@ def run_si3d_workflow():
 
     model_start_date = start - datetime.timedelta(weeks=1)
 
-    # Retrieve data from various API's
-    drs.retrieve()
-    drs.create_si3d_surfbc(f"{MODEL_DIR}/surfbc.txt", model_start_date)
+    try:
+        # Retrieve data from various API's
+        drs.retrieve()
+        drs.create_si3d_surfbc(f"{MODEL_DIR}/surfbc.txt", model_start_date)
 
-    # Update si3d_inp.txt
-    update_si3d_inp(model_start_date)
+        # Update si3d_inp.txt
+        update_si3d_inp(model_start_date)
 
-    # Run si3d model
-    run_si3d()
+        # Run si3d model
+        run_si3d()
 
-    # Parse model output into Numpy array files
-    create_output_binary()
+        # Parse model output into Numpy array files
+        create_output_binary()
 
-    # Send array files to S3
-    save_model_output()
+        # Send array files to S3
+        save_model_output()
 
-    end = datetime.datetime.now(datetime.timezone.utc)
-    print(f"[DataRetrievalService]: Finished si3d workflow at {format_date(end)}")
-    print(f"[DataRetrievalService]: Job 'si3d workflow' took {format_duration(end - start)} to complete")
-
-    # Shutdown EC2 instance
-    # https://stackoverflow.com/a/22913651
-    # Must invoke IMDSv2 to get current instance ID for shutting down
-    os.system("aws ec2 stop-instances --instance-ids $(curl -s http://169.254.169.254/latest/meta-data/instance-id)")
+        end = datetime.datetime.now(datetime.timezone.utc)
+        print(f"[DataRetrievalService]: Finished si3d workflow at {format_date(end)}")
+        print(f"[DataRetrievalService]: Job 'si3d workflow' took {format_duration(end - start)} to complete")
+    except Exception as e:
+        print(f"[DataRetrievalService]: DRS failed due to error")
+        print(e)
+    finally:
+        # Shutdown EC2 instance
+        # https://stackoverflow.com/a/22913651
+        # Must invoke IMDSv2 to get current instance ID for shutting down
+        os.system("aws ec2 stop-instances --instance-ids $(curl -s http://169.254.169.254/latest/meta-data/instance-id)")
 
 if __name__ == '__main__':
     run_si3d_workflow()
