@@ -14,6 +14,7 @@ from model.update_si3d_inp import update_si3d_inp
 from save_model_output import save_model_output
 import datetime
 import os
+import traceback
 
 MODEL_DIR = "./model/psi3d/"
 format_date = lambda date: datetime.datetime.strftime(date, "%Y-%m-%d %H:%M:%S UTC")
@@ -47,9 +48,9 @@ def run_si3d_workflow():
         end = datetime.datetime.now(datetime.timezone.utc)
         print(f"[DataRetrievalService]: Finished si3d workflow at {format_date(end)}")
         print(f"[DataRetrievalService]: Job 'si3d workflow' took {format_duration(end - start)} to complete")
-    except Exception as e:
+    except Exception:
         print(f"[DataRetrievalService]: DRS failed due to error")
-        print(e)
+        print(traceback.print_exc())
     finally:
         # Shutdown EC2 instance
         # https://stackoverflow.com/a/22913651
