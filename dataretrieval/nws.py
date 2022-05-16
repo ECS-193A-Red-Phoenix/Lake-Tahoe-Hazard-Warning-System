@@ -160,7 +160,7 @@ def get_model_forecast_data():
     # Temporary shortwave formula based on historical AWS data
     # To see this formula visit https://www.desmos.com/calculator/wawbpdxtkd
     hourize = lambda t: t.hour + t.minute / 60
-    f = lambda t: 5.1276e+02 * np.exp(-9.4720e-02 * (t - 1.1238e-01)**2)
+    f = lambda t: 1014 * np.exp(-9.4720e-02 * (t - 1.1238e-01)**2)
     g = lambda t: f(((hourize(t) + -10) % 24) - 10)
     df['shortwave'] = [g(t_i) for t_i in df['time']]
 
