@@ -186,7 +186,8 @@ def remove_outliers(df):
     # Clip features between lo and hi
     for feature, (lo, hi) in ATTR_BOUNDS.items():
         # Clip features
-        df[feature] = np.clip(df[feature], lo, hi)
+        if feature in df.columns:
+            df[feature] = np.clip(df[feature], lo, hi)
 
     # Set features > 3 std to mean
     for feature in df.columns:
@@ -205,7 +206,7 @@ def remove_outliers(df):
 
     for feature, (lo, hi) in ATTR_BOUNDS.items():
         # Shortwave is an edge case, where its okay for data to sit at the bounds
-        if feature == 'shortwave':
+        if feature == 'shortwave' or feature not in df.columns:
             continue
         mean = df[feature].rolling(window=100, center=True, min_periods=1).mean()
         df[feature].where(df[feature] != hi, mean, inplace=True)
