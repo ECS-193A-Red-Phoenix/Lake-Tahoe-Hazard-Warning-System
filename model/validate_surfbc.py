@@ -23,8 +23,18 @@ for line in lines:
         i += 10 + 1
     data.append(sample)    
 
-features = ["time", "attenuation coefficient", "shortwave", "air temp", "atmospheric pressure",
-   "relative humidity", "longwave", "wind drag coefficient", "wind u", "wind v"]
+features = [
+    "time", 
+    "attenuation coefficient", 
+    "shortwave", 
+    "air temp", 
+    "atmospheric pressure",
+    "relative humidity", 
+    "longwave", 
+    "wind drag coefficient", 
+    "wind u", 
+    "wind v"
+]
 df = pd.DataFrame(data, columns=features)
 
 for i in range(1, len(features)):
