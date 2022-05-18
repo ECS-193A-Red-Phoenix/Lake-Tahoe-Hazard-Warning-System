@@ -1,8 +1,7 @@
 from matplotlib import pyplot as plt
 from .HPlane_Si3DtoPython import HPlane_Si3dToPython
 import time
-import os
-import sys
+import os, logging, sys
 
 ##############################################################
 # User Config
@@ -11,23 +10,39 @@ H_PLANE_PATH = "./model/psi3d/plane_2"        # Path to model output file
 DX = 200                                      # idx parameter from simulation
 ##############################################################
 
+logFilename = "logs/s3_log.log"
+logging.basicConfig(
+    level=logging.INFO,  # all levels greater than or equal to info will be logged to this file
+    filename=logFilename,  # logger file location
+    filemode="w",  # overwrites a log file
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 def create_output_maps():
     start_time = time.time()
 
-    print(f"File running from directory {os.getcwd()}")
-    print(f"Searching for h plane file {H_PLANE_PATH}")
+    str1 = f"File running from directory {os.getcwd()}"
+    str2 = f"Searching for h plane file {H_PLANE_PATH}"
+    msg = f"{str1}\n{str2}"
+    logging.info(msg)
+
     if not os.path.isfile(H_PLANE_PATH):
-        print(f"[Error]: Could not find h plane file {H_PLANE_PATH}")
-        print("Exiting program")
+        str1 = f"[Error]: Could not find h plane file {H_PLANE_PATH}"
+        str2 = "Exiting program"
+        msg = f"{str1}\n{str2}"
+        logging.error(msg)
         sys.exit(0)
     h_plane = HPlane_Si3dToPython(H_PLANE_PATH, DX)
     n_rows, n_cols, n_frames = h_plane['Tg'].shape
-    print("Found h plane file")
-    print(f"Map dimensions (row, cols, n_frames) = {(n_rows, n_cols, n_frames)}")
+    str1 = "Found h plane file"
+    str2 = f"Map dimensions (row, cols, n_frames) = {(n_rows, n_cols, n_frames)}"
+    msg = f"{str1}\n{str2}"
+    logging.info(msg)
 
     # Create output directories if they don't exist
     if not os.path.isdir(OUTPUT_DIR):
-        print(f"Output directory does not exist, creating folders {OUTPUT_DIR}")
+        str1 = f"Output directory does not exist, creating folders {OUTPUT_DIR}"
+        logging.info(str1)
         os.mkdir(OUTPUT_DIR)
     if not os.path.isdir(OUTPUT_DIR + "temperature/"):
         os.mkdir(OUTPUT_DIR + "temperature/")
@@ -54,8 +69,20 @@ def create_output_maps():
         v = h_plane['vg'][:, :, idx]
         w = h_plane['wg'][:, :, idx]
         magnitude = (u**2 + v**2 + w**2)**0.5
-        surface_flow = ax.quiver(xg, yg, u, v, magnitude, cmap='Spectral_r', 
-            scale=4, scale_units='inches', headwidth=3, headlength=5, headaxislength=10, width=0.008)
+        surface_flow = ax.quiver(
+            xg, 
+            yg, 
+            u, 
+            v, 
+            magnitude, 
+            cmap='Spectral_r', 
+            scale=4, 
+            scale_units='inches', 
+            headwidth=3, 
+            headlength=5, 
+            headaxislength=10, 
+            width=0.008
+        )
 
         cax = plt.axes([0.7, 0.125, 0.02, 0.75])
         cbar = fig.colorbar(surface_flow, cax=cax)
@@ -67,9 +94,11 @@ def create_output_maps():
 
         plt.savefig(OUTPUT_DIR + FLOW_DIR + f'flow_{timestamp}', bbox_inches='tight')
         plt.cla()
-        print(f"Created output flow map for {timestamp}")
+        str1 = f"Created output flow map for {timestamp}"
+        logging.info(str1)
     plt.close()
-    print(f"Finished creating {n_frames} flow maps located in {OUTPUT_DIR + FLOW_DIR}")
+    str1 = f"Finished creating {n_frames} flow maps located in {OUTPUT_DIR + FLOW_DIR}"
+    logging.info(str1)
 
 
     ##############################################################
@@ -100,13 +129,17 @@ def create_output_maps():
 
         plt.savefig(OUTPUT_DIR + TEMPERATURE_DIR + f'temperature_{timestamp}', bbox_inches='tight')
         plt.cla()
-        print(f"Created output temperature map for {timestamp}")
-    print(f"Finished creating {n_frames} temperature maps located in {OUTPUT_DIR + TEMPERATURE_DIR}")
+        str1 = f"Created output temperature map for {timestamp}"
+        logging.info(str1)
+    str1 = f"Finished creating {n_frames} temperature maps located in {OUTPUT_DIR + TEMPERATURE_DIR}"
+    logging.info(str1)
     plt.close()
 
     end_time = time.time()
-    print(f"Completed all tasks in {(end_time - start_time):.2f} seconds")
-    print(f"Created {n_frames} flow maps from {h_plane['time'][0]} to {h_plane['time'][-1]}")
+    str1 = f"Completed all tasks in {(end_time - start_time):.2f} seconds"
+    str2 = f"Created {n_frames} flow maps from {h_plane['time'][0]} to {h_plane['time'][-1]}"
+    msg = f"{str1}\n{str2}"
+    logging.info(msg)
 
 
 if __name__ == '__main__':

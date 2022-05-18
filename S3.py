@@ -25,7 +25,7 @@ class S3:
             service_name="s3",
             region_name="us-west-2",
             aws_access_key_id=credentials.aws_access_key_id,
-            aws_secret_access_key=crghedentials.aws_secret_access_key
+            aws_secret_access_key=credentials.aws_secret_access_key
         )
         self.__bucketName = "lake-tahoe-conditions"
         self.__cwd = Path.cwd()
