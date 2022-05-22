@@ -169,7 +169,7 @@ class S3:
 
     # TODO: not sure how to check if the request failed
     def deleteObject(self, objKey):
-        self.__client.delete(Bucket=self.__bucketName, Key=objKey)
+        self.__client.delete_object(Bucket=self.__bucketName, Key=objKey)
 
     def getAllFlowFilesFromDRS(self) -> List[str]:
         # return a list of filenames for objects in Flow Subdirectory in DRS
