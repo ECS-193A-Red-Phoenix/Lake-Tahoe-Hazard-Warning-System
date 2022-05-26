@@ -1,6 +1,6 @@
 from model.HPlane_Si3DtoPython import HPlane_Si3dToPython
 import numpy as np
-import os
+import os, logging
 
 ##############################################################
 # User Config
@@ -11,16 +11,27 @@ FLOW_DIR = "flow/"
 TEMPERATURE_DIR = "temperature/"
 ##############################################################
 
+logFilename = "logs/s3_log.log"
+logging.basicConfig(
+    level=logging.INFO,  # all levels greater than or equal to info will be logged to this file
+    filename=logFilename,  # logger file location
+    filemode="w",  # overwrites a log file
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 def create_output_binary():
     h_plane = HPlane_Si3dToPython(H_PLANE_PATH, DX)
 
     n_rows, n_cols, n_frames = h_plane['Tg'].shape
-    print("Found h plane file")
-    print(f"Map dimensions (row, cols, n_frames) = {(n_rows, n_cols, n_frames)}")
+    str1 = "Found h plane file"
+    str2 = f"Map dimensions (row, cols, n_frames) = {(n_rows, n_cols, n_frames)}"
+    msg = f"{str1}\n{str2}"
+    logging.info(msg)
 
     # Create output directories if they don't exist
     if not os.path.isdir(OUTPUT_DIR):
-        print(f"Output directory does not exist, creating folders {OUTPUT_DIR}")
+        str1 = f"Output directory does not exist, creating folders {OUTPUT_DIR}"
+        logging.info(str1)
         os.mkdir(OUTPUT_DIR)
     if not os.path.isdir(OUTPUT_DIR + "temperature/"):
         os.mkdir(OUTPUT_DIR + TEMPERATURE_DIR)
@@ -35,7 +46,9 @@ def create_output_binary():
 
         t = h_plane['Tg'][:, :, idx]
         np.save(OUTPUT_DIR + TEMPERATURE_DIR + timestamp + '.npy', t)
-        print("Saved uv and temperature at " + timestamp)
+        str1 = f"Saved uv and temperature at {timestamp}"
+        logging.info(str1)
+
 
 
 if __name__ == '__main__':

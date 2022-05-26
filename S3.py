@@ -8,7 +8,15 @@ import credentials
 
 import datetime
 from datetime import timezone
-import os
+import os, logging
+
+logFilename = "logs/s3_log.log"
+logging.basicConfig(
+    level=logging.INFO,  # all levels greater than or equal to info will be logged to this file
+    filename=logFilename,  # logger file location
+    filemode="w",  # overwrites a log file
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 class S3:
 
@@ -43,8 +51,18 @@ class S3:
                 "bucketName": self.__bucketName,
                 "locationInBucket": key,
             }
-            return True, message
 
+            logging.info(message)
+            return True, message
+        
+        message = {
+            "message": "successful",
+            "fileUploaded": localFilePath,
+            "bucketName": self.__bucketName,
+            "locationInBucket": key,
+        }
+
+        logging.warning(message)  # this request failed       
         return False, {"message": "failed"}
 
     def __insertToBucket(self, localFilePath: str, fileName: str) -> Union[bool, Dict[str, str]]:
@@ -103,6 +121,10 @@ class S3:
             # insert contents.json into s3 bucket
             self.__insertToBucket(localFilePath=fileLocation, fileName=key)
 
+        # logging contents.json
+        logMsg = f"contents.json: \n{contentsJSON}"
+        logging.info(logMsg)
+
         # return contents.json after parsing into Dict[str, List[str]]
         return contentsJSON
 
@@ -157,6 +179,9 @@ class S3:
         # if testing uncomment next lines
         # key = "save_model_output_test/contents.json"
 
+        logMsg = f"Updated contents.json \n{contentsJSON}"
+        logging.info(logMsg)
+
         # insert contents.json into s3 bucket
         return self.__insertToBucket(localFilePath=fileLocation, fileName=key)
 
@@ -170,6 +195,8 @@ class S3:
     # TODO: not sure how to check if the request failed
     def deleteObject(self, objKey):
         self.__client.delete_object(Bucket=self.__bucketName, Key=objKey)
+        logMsg = f"Deleted {objKey} from {self.__bucketName}"
+        logging.info(logMsg)  # log deletion
 
     def getAllFlowFilesFromDRS(self) -> List[str]:
         # return a list of filenames for objects in Flow Subdirectory in DRS
@@ -200,6 +227,11 @@ class S3:
             fileName = objName[index + 1:]
             if dirName == key:
                 objectsInBucket.append(fileName)
+        
+        # log results
+        logMsg = f"Objects in Bucket with key: {key} \n{objectsInBucket}"
+        logging.debug(logMsg)
+
         return objectsInBucket
 
     def prettyPrint(self, obj: Dict[str, Union[str, List[str]]], title: str = "MAP:") -> None:

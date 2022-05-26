@@ -1,7 +1,16 @@
 from datetime import datetime, timedelta, timezone
 import re
+import logging
 
 SI3D_INP_PATH = "./model/psi3d/si3d_inp.txt"
+
+logFilename = "logs/s3_log.log"
+logging.basicConfig(
+    level=logging.INFO,  # all levels greater than or equal to info will be logged to this file
+    filename=logFilename,  # logger file location
+    filemode="w",  # overwrites a log file
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 def update_si3d_inp(start_date):
     """ Updates the starting date of the simulation in si3d_inp.txt
@@ -17,7 +26,8 @@ def update_si3d_inp(start_date):
     month = f"{start_date.month:02}"
     day = f"{start_date.day:02}"
     hour = f"{start_date.hour:02}00"
-    print(f"update_si3d_inp(): Updating si3d_inp date to {year}-{month}-{day} {hour}")
+    str1 = f"update_si3d_inp(): Updating si3d_inp date to {year}-{month}-{day} {hour}"
+    logging.info(str1)
 
     si3d_inp = re.sub(
        r"year         !    \d+            !",
@@ -47,4 +57,5 @@ def update_si3d_inp(start_date):
 if __name__ == "__main__":
     start_date = datetime.now(timezone.utc) - timedelta(days=7)
     update_si3d_inp(start_date)
-    print("Updated si3d_inp.txt")
+    str1 = "Updated si3d_inp.txt"
+    logging.info(str1)
