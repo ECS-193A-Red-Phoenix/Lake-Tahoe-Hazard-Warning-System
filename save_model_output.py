@@ -1,9 +1,19 @@
 import os
 import datetime
-
+import logging
 import S3
 
 OUTPUT_DIRS = ["./outputs/flow", "./outputs/temperature"]
+
+logFilename = "logs/s3_log.log"
+logging.basicConfig(
+    level=logging.INFO,  # all levels greater than or equal to info will be logged to this file
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(logFilename, mode="w"),
+        logging.StreamHandler()
+    ]
+)
 
 def save_model_output() -> None:
     today = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=8)
@@ -25,13 +35,13 @@ def save_model_output() -> None:
                 flow = (bucketSubDirectory == "flow")  # if false then file will be uploaded to temperature
                 successful, msg = s3.uploadToS3(fileLocation, filename, flow)
                 if successful:
-                    print(s3.prettyPrint(msg, title="File Upload Response: ")) 
+                    s3.prettyPrint(msg, title="File Upload Response: ")
                 else:
-                    print("Upload Failed!")
+                    logging.error("Upload Failed!")
     
     # update contents.json
     _, response = s3.updateContents()
-    print(response)
+    logging.info(response)
     return None
 
 

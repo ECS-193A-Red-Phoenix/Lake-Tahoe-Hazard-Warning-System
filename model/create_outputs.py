@@ -13,9 +13,11 @@ DX = 200                                      # idx parameter from simulation
 logFilename = "logs/s3_log.log"
 logging.basicConfig(
     level=logging.INFO,  # all levels greater than or equal to info will be logged to this file
-    filename=logFilename,  # logger file location
-    filemode="w",  # overwrites a log file
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(logFilename, mode="w"),
+        logging.StreamHandler()
+    ]
 )
 
 def create_output_maps():

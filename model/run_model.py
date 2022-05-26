@@ -21,10 +21,13 @@ MODEL_NAME = './psi3d'
 logFilename = "logs/s3_log.log"
 logging.basicConfig(
     level=logging.INFO,  # all levels greater than or equal to info will be logged to this file
-    filename=logFilename,  # logger file location
-    filemode="w",  # overwrites a log file
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(logFilename, mode="w"),
+        logging.StreamHandler()
+    ]
 )
+
 
 def run_si3d(verbose=True):
     """
@@ -38,6 +41,9 @@ def run_si3d(verbose=True):
     if verbose:
         for line in process.stdout:
             str1 = line.decode('utf8')
+            # Remove extra \n
+            if len(str1) >= 1:
+                str1 = str1[:-1]   
             logging.info(str1)
     process.wait()
     

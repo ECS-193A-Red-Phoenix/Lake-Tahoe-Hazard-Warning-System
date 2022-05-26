@@ -11,22 +11,35 @@ from dataretrieval.service import DataRetrievalService
 from model.run_model import run_si3d
 from model.create_output_binary import create_output_binary
 from model.update_si3d_inp import update_si3d_inp
+from model.update_si3d_init import create_ctd_profile_from_node
 from save_model_output import save_model_output
+import logging
 import datetime
 import os
 import traceback
 
+logFilename = "logs/s3_log.log"
+logging.basicConfig(
+    level=logging.INFO,  # all levels greater than or equal to info will be logged to this file
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(logFilename, mode="w"),
+        logging.StreamHandler()
+    ]
+)
+
 MODEL_DIR = "./model/psi3d/"
-format_date = lambda date: datetime.datetime.strftime(date, "%Y-%m-%d %H:%M:%S UTC")
+format_date = lambda date: datetime.datetime.strftime(date.astimezone(tz=None), "%Y-%m-%d %H:%M:%S PST")
 format_duration = lambda delta: str(delta)
 
 drs = DataRetrievalService()
 
 def run_si3d_workflow():
     start = datetime.datetime.now(datetime.timezone.utc)
-    print(f"[DataRetrievalService]: Starting si3d workflow at {format_date(start)}")
+    logging.info(f"[DataRetrievalService]: Starting si3d workflow at {format_date(start)}")
 
     model_start_date = start - datetime.timedelta(weeks=1)
+    logging.info(f"Simulation start date: {format_date(model_start_date)}")
 
     try:
         # Retrieve data from various API's
@@ -35,6 +48,10 @@ def run_si3d_workflow():
 
         # Update si3d_inp.txt
         update_si3d_inp(model_start_date)
+
+        # Update si3d_init.txt using node 65, 135
+        tf_path = f"{MODEL_DIR}tf65_135.txt"
+        create_ctd_profile_from_node(tf_path, MODEL_DIR, profile_date=model_start_date)
 
         # Run si3d model
         run_si3d()
@@ -46,11 +63,11 @@ def run_si3d_workflow():
         save_model_output()
 
         end = datetime.datetime.now(datetime.timezone.utc)
-        print(f"[DataRetrievalService]: Finished si3d workflow at {format_date(end)}")
-        print(f"[DataRetrievalService]: Job 'si3d workflow' took {format_duration(end - start)} to complete")
+        logging.info(f"[DataRetrievalService]: Finished si3d workflow at {format_date(end)}")
+        logging.info(f"[DataRetrievalService]: Job 'si3d workflow' took {format_duration(end - start)} to complete")
     except Exception:
-        print(f"[DataRetrievalService]: DRS failed due to error")
-        print(traceback.print_exc())
+        logging.critical(f"[DataRetrievalService]: DRS failed due to error")
+        logging.critical(traceback.print_exc())
     finally:
         # Shutdown EC2 instance
         # https://stackoverflow.com/a/22913651

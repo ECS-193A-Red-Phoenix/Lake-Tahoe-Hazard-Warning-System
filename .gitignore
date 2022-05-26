@@ -9,3 +9,4 @@ scripts/*
 credentials.py
 ./outputs/*
 model/psi3d/plane_2
+./logs

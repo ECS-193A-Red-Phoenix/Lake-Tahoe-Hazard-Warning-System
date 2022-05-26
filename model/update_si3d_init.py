@@ -1,8 +1,19 @@
 import pandas as pd
 import numpy as np
+import logging
 from datetime import datetime, timedelta, timezone
 
 CTD_LAYERS = np.array([0.26, 0.26, 0.77, 1.29, 1.83, 2.38, 2.94, 3.5, 4.08, 4.67, 5.28, 5.89, 6.53, 7.17, 7.82, 8.48, 9.16, 9.86, 10.57, 11.29, 12.02, 12.77, 13.54, 14.32, 15.12, 15.93, 16.76, 17.6, 18.46, 19.34, 20.23, 21.15, 22.09, 23.04, 24.01, 25.0, 26.01, 27.04, 28.09, 29.16, 30.25, 31.37, 32.5, 33.66, 34.85, 36.06, 37.29, 38.55, 39.83, 41.13, 42.47, 43.83, 45.21, 46.62, 48.06, 49.53, 51.03, 52.56, 54.13, 55.73, 57.35, 59.01, 60.7, 62.42, 64.17, 65.97, 67.8, 69.66, 71.57, 73.51, 75.49, 77.51, 79.57, 81.67, 83.81, 86.0, 88.23, 90.5, 92.83, 95.19, 97.6, 100.06, 102.58, 105.14, 107.75, 110.41, 113.14, 115.91, 118.74, 121.62, 124.56, 127.56, 130.62, 133.75, 136.94, 140.18, 143.5, 146.88, 150.32, 153.84, 157.43, 161.09, 164.81, 169.2, 174.2, 179.2, 184.2, 189.2, 194.2, 199.2, 204.2, 209.2, 214.2, 219.2, 224.2, 229.2, 234.2, 239.2, 244.2, 249.2, 254.2, 259.2, 264.2, 269.2, 274.2, 279.2, 284.2, 289.2, 294.2, 299.2, 304.2, 309.2, 314.2, 319.2, 324.2, 329.2, 334.2, 339.2, 344.2, 349.2, 354.2, 359.2, 364.2, 369.2, 374.2, 379.2, 384.2, 389.2, 394.2, 399.2, 404.2, 409.2, 414.2, 419.2, 424.2, 429.2, 434.2, 439.2, 444.2, 449.2, 454.2, 459.2, 464.2, 469.2, 474.2, 479.2, 484.2, 489.2, 494.2, 499.2, 503.35, 503.35])
+
+logFilename = "logs/s3_log.log"
+logging.basicConfig(
+    level=logging.INFO,  # all levels greater than or equal to info will be logged to this file
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(logFilename, mode="w"),
+        logging.StreamHandler()
+    ]
+)
 
 def parse_tf_file(file_path, ignore_period=timedelta(hours=0)):
     """ Parses a tf file in a usable data structure
@@ -97,23 +108,23 @@ def create_ctd_profile_from_node(tf_file_path, output_dir, profile_date=None):
 
     # If the tf file has no data, don't do anything, we will use the si3d_init.txt file from the previous run.
     if len(tf_file) == 0:
-        print(f"Warning: {tf_file_path} does not contain any data, thus we are unable")
-        print(f"         to update si3d_init.txt. Using initialization from previous run.")
+        logging.warning(f"Warning: {tf_file_path} does not contain any data, thus we are unable")
+        logging.warning(f"         to update si3d_init.txt. Using initialization from previous run.")
         return []
 
     # Extract closest dated dataframe in tf file
     time, df = min(tf_file, key=lambda tuple: abs((profile_date - tuple[0]).total_seconds()))
-    print(f"Successfully parsed tf file {tf_file_path} containing {len(tf_file)} data points")
-    print(f"tf file contains data points from {format_date(tf_file[0][0])} to {format_date(tf_file[-1][0])}")
-    print(f"Trying to create ctd profile from {format_date(profile_date)}")
-    print(f"Creating ctd profile using closest data point: {format_date(time)}")
+    logging.info(f"Successfully parsed tf file {tf_file_path} containing {len(tf_file)} data points")
+    logging.info(f"tf file contains data points from {format_date(tf_file[0][0])} to {format_date(tf_file[-1][0])}")
+    logging.info(f"Trying to create ctd profile from {format_date(profile_date)}")
+    logging.info(f"Creating ctd profile using closest data point: {format_date(time)}")
 
     z, T = df['depth'], df['scalar']          # extract depth and temperature 
     T = np.interp(CTD_LAYERS, z, T)           # interpolate temperature from layers
     new_ctd = list(zip(-1 * CTD_LAYERS, T))   # combine
 
     create_si3d_init(new_ctd, output_dir)
-    print(f"Created si3d_init.txt file in {output_dir}")
+    logging.info(f"Created si3d_init.txt file in {output_dir}")
     return new_ctd
 
 

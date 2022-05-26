@@ -13,9 +13,11 @@ import os, logging
 logFilename = "logs/s3_log.log"
 logging.basicConfig(
     level=logging.INFO,  # all levels greater than or equal to info will be logged to this file
-    filename=logFilename,  # logger file location
-    filemode="w",  # overwrites a log file
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(logFilename, mode="w"),
+        logging.StreamHandler()
+    ]
 )
 
 class S3:
@@ -96,7 +98,7 @@ class S3:
         fileLocation = f"{prefixPath}/{key}"
 
         if 'Contents' in result:
-            print(f"{key} exists in the bucket.")
+            logging.info(f"{key} exists in the bucket.")
 
             # retreive contents.json
             self.__client.download_file(
@@ -109,7 +111,7 @@ class S3:
             f = open(fileLocation)
             contentsJSON = json.load(f)
         else:
-            print(f"{key} doesn't exist in the bucket.")
+            logging.info(f"{key} doesn't exist in the bucket.")
 
             # if it doesn't make a contents.json for the first time and insert to bucket
             contentsJSON = self.__createContents()
@@ -159,7 +161,7 @@ class S3:
                 if objDate >= twoWeeksAgo:
                     continue
                 
-                print(f"Deleting {obj['Key']}...")
+                logging.info(f"Deleting {obj['Key']}...")
                 self.deleteObject(obj["Key"])
                 
                 # Delete local copy of old prediction
@@ -236,23 +238,24 @@ class S3:
 
     def prettyPrint(self, obj: Dict[str, Union[str, List[str]]], title: str = "MAP:") -> None:
         # prints map neatly for debugging
-        print()
-        print(title)
+        s = "\n"
+        s += f"{title}\n"
         for k, v in obj.items():
-            print(f"{k} -> {v}")
-            print()
-        print()
-        return None
+            s += f"{k} -> {v}\n\n"
+        s += "\n"
+        print(s)
+        logging.info(s)
+        return s
 
     def prettyPrintArray(self, arr: List[str], title: str = "Array: ") -> None:
         # prints array neatly for debugging
-        print()
-        print(title)
-        print()
+        s = f"\n{title}\n"
         for v in arr:
-            print(v)
-        print()
-        return None
+            s += f"{v}\n"
+        s += "\n"
+        print(s)
+        logging.info(s)
+        return s
 
 # for testing purposes and debugging purposes
 """

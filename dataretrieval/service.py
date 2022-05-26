@@ -22,6 +22,17 @@ from dataretrieval.nws import get_model_forecast_data
 import datetime
 import pandas as pd
 import os
+import logging
+
+logFilename = "logs/s3_log.log"
+logging.basicConfig(
+    level=logging.INFO,  # all levels greater than or equal to info will be logged to this file
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(logFilename, mode="w"),
+        logging.StreamHandler()
+    ]
+)
 
 class DataRetrievalService:
     ARCHIVE_DATA = False        # if set to true, will store model inputs in a csv file
