@@ -73,7 +73,22 @@ This section will describe some of the methodology and organization of our code.
 
 ### What is surfbc.txt and how is it automatically updated?
 
-One of crucial si3d input files is `surfbc.txt`. The first 6 lines of this file are informational headers that are ignored by si3d when it is parsed. The 7th line describes how many data points are listed below. The rest of the file consists of 10 columns of data that the model uses to simulate the lake. The columns are 10 characters long, right aligned, and each is separated with space character. The 10 columns represent the following: time, attenuation coefficient, shortwave, air temp, atmospheric pressure, relative humidity, longwave, wind drag coefficient, wind u  wind v. The attenuation coefficient and wind drag coefficients are predefined constants. To create the surfbc.txt file, we must retrieve past and future data for each of these variables and concatenate the two. Typically, we retrieve data starting from one week from the present date and ending for as far as the forecasts go (typically up to a week in the future).
+One of crucial si3d input files is `surfbc.txt`. This is the layout of the file:
+- The first 6 lines of this file are informational headers that are ignored by si3d when it is parsed.
+- The 7th line describes how many data points are listed below.
+- The rest of the file consists of 10 columns of data that the model uses to simulate the lake. The columns are 10 characters long, right aligned, and each is separated with space character. The 10 columns represent the following:
+    - time
+    - attenuation coefficient
+    - shortwave
+    - air temp
+    - atmospheric pressure
+    - relative humidity
+    - longwave
+    - wind drag coefficient
+    - wind u
+    - wind v
+
+The attenuation coefficient and wind drag coefficients are predefined constants. To create the `surfbc.txt` file, we must retrieve past and future data for each of these variables and concatenate the two. Typically, we retrieve data starting from one week from the present date and ending for as far as the forecasts go (typically up to a week in the future).
 
 To retrieve past data, we collect JSON samples from USCG and NASA Buoy API's. This data is processed into a dataframe and cleaned using different statistical techniques to eliminate noise. The code for this is located in `get_model_historical_data` in `dataretrieval/aws.py`.
 
