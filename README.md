@@ -37,6 +37,7 @@ Running this command will complete the following steps:
 2. Run the si3d executable `model/psi3d/psi3d`
 3. Parse the model output file `model/psi3d/plane_2` and generate `.npy` files for each temperature and flow visualization in `outputs`
 4. Upload the `.npy` files to S3 and update `contents.json`, deleting old `.npy` files if any.
+5. Shutdown the EC2 instance.
 
 ## Updating this repository
 
