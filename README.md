@@ -98,7 +98,7 @@ We read `plane_2` and output a dated `.npy` file within the `outputs/` directory
 
 ### How are model output files managed?
 
-After every simulation, we upload recent `.npy` files to S3. Afterwards, we delete files in S3 that are older than two weeks.  
+After every simulation, we upload recent `.npy` files to S3. Afterwards, we delete files in S3 that are older than two weeks. S3 also contains a file `contents.json` that lists the available `.npy` files. This is necessary for our website to know which files are available in S3. 
 
 <br/>
 
