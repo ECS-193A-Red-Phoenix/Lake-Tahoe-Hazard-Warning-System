@@ -32,7 +32,9 @@ Install these packages in the EC2 instance if they don't already exist:
 1. Begin by cloning this repository with:
 `git clone https://github.com/ECS-193A-Red-Phoenix/LakeTahoe-HazardWarningSystem.git`
 2. Install the dependencies using:
- `pip install -r requirements.txt`
+`pip install -r requirements.txt`
+3. Copy `drs.service` into the `/etc/systemd/system` folder. This config file tells the system to start the data retrieval service when the instance boots up.
+`sudo cp drs.service /etc/systemd/system``
 
 ## Running the model
 To start the si3d workflow, run the following:
