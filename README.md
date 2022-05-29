@@ -18,24 +18,23 @@ Table of Contents
 4. [Known errors](#known-errors)
 5. [Technical details](#technical-details)
 
-## Installation
-
-Begin by cloning this repository with
-
-`git clone https://github.com/ECS-193A-Red-Phoenix/LakeTahoe-HazardWarningSystem.git`
-
-Install Python 3. Any `3.x` version should be fine, but we use Python 3.8.8.
-
-Make sure you install required python packages with
-
-`pip install -r requirements.txt`
-
+## Installation on EC2 instance
 ### Configuring an EC2 instance
-1. Create an EC2 instance. This is meant to be persistent.
-2. Run `aws configure` and add your AWS account credentials in order for our code to shutdown the EC2 instance.
+1. Create an EC2 instance. This is meant to be persistent, so do not terminate the instance!
+2. Run `aws configure` and add your AWS account credentials. Our code uses the `aws` command line tool to shutdown the EC2 instance.
+
+### Prerequisites
+Install these packages in the EC2 instance if they don't already exist:
+- Python 3 (any 3.x version should work, but we use 3.8.10 in our EC2 instance)
+- Pip
+
+### Setting up repository
+1. Begin by cloning this repository with:
+`git clone https://github.com/ECS-193A-Red-Phoenix/LakeTahoe-HazardWarningSystem.git`
+2. Install the dependencies using:
+ `pip install -r requirements.txt`
 
 ## Running the model
-
 To start the si3d workflow, run the following:
 
 `python3 si3d.py`
