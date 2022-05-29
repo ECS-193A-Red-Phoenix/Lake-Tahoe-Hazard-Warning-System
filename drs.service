@@ -1,0 +1,7 @@
+[Unit]
+Description=Automatically run the LTHWS data retrieval service script upon system startup
+[Service]
+ExecStart=/usr/bin/python3 /home/tahoews/LakeTahoe-HazardWarningSystem/si3d.py
+[Install]
+WantedBy=multi-user.target
+
