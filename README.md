@@ -46,7 +46,7 @@ Running this command will complete the following steps:
 1. Retrieve data, clean it, and prepare model input files located in `model/psi3d`. In particular, we update `surfbc.txt`, `si3d_inp.txt`, and `si3d_init.txt`. These input files are all located within the `model/psi3d`.
 2. Run the si3d executable `model/psi3d/psi3d`
 3. Parse the model output file `model/psi3d/plane_2` and generate `.npy` files for each temperature and flow visualization in `outputs`
-4. Upload the `.npy` files to S3 and update `contents.json`, deleting old `.npy` files if any.
+4. Upload the `.npy` files to S3 and update `contents.json`, deleting old `.npy` files in our S3 bucket and locally if any.
 5. Shutdown the EC2 instance.
 
 ## Updating this repository
