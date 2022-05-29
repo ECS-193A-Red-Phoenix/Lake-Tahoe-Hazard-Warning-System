@@ -1,6 +1,15 @@
-# Lake Tahoe Warning System
+# Data Retrieval Service
 
-This repository hosts code that automates the workflow of the si3d model for Lake Tahoe. This means retrieving the necessary data from various API's and creating input files for the si3d model, running it and storing the results in S3. The steps for installation may be skipped for the Amazon EC2 instance that we use, as this repository has already been setup there. 
+## SI3D Model
+To predict hazardous conditions in Lake Tahoe, we use a program written in Fortran called the `si3d` model. It takes in various conditions as input such as air temperature, air pressure, and wind speed, and it outputs a forecast for several properties of the lake over a time period.
+
+## Data Retrieval Service
+This repository hosts Python scripts that automates the workflow of the si3d model. The main Python script `si3d.py` performs the following tasks:
+1. Retrieve the necessary data from various API's
+2. Generate input files for the si3d program
+3. Run the compiled si3d binary
+
+The steps for installation may be skipped for the Amazon EC2 instance that we use, as this repository has already been setup there. 
 
 Table of Contents
 1. [Installation](#installation)
