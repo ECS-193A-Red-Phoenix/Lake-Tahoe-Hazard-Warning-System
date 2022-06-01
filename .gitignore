@@ -10,3 +10,4 @@ credentials.py
 ./outputs/*
 model/psi3d/plane_2
 ./logs
+model/psi3d/tf65_135.txt
