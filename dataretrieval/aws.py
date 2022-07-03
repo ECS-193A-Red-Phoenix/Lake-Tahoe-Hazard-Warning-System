@@ -4,6 +4,7 @@ Lake Tahoe Station data from AWS.
 Note: all timestamps are in UTC
 """
 
+from bisect import bisect_left
 from collections import defaultdict
 import numpy as np
 import pandas as pd
@@ -13,7 +14,8 @@ import requests
 ENDPOINTS = {
     'USCG': "https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/met-uscg2020",
     'NASA_BUOY': "https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/nasa-tb",
-    'NEARSHORE': "https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/ns-station-range"
+    'NEARSHORE': "https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/ns-station-range",
+    'TEMPERATURE_CHAIN': "https://tepfsail50.execute-api.us-west-2.amazonaws.com/v1/report/tc-homewood"
 }
 
 ## Default station IDs to use
@@ -51,6 +53,91 @@ def get_endpoint_json(url, id, start_date, end_date=None):
         raise Exception(f"AWS endpoint failed: {response.url}")
 
     return response_json
+
+
+def get_model_ctd_profile(date):
+    """ Creates a ctd profile by combining instrument data from the Homewood nearshore
+        station and temperature chain at HWTC
+        Note:
+        - Instrument gives data in regular intervals of 20 minutes
+        so we just pick the data that is closest to the given date
+        
+        Args:
+            date (datetime): the date of the desired ctd profile
+    """
+    ctd_profile = []
+    
+    # Retrieve data from homewood station
+    homewood_data = get_endpoint_json(ENDPOINTS['NEARSHORE'], 4, date)
+
+    # Pick closest date within given data
+    parse_date = lambda date: datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S") \
+                                               .replace(tzinfo=datetime.timezone.utc)
+    data_dates = [parse_date(d["TmStamp"]) for d in homewood_data]
+    closest_date_idx = bisect_left(data_dates, date)
+    if closest_date_idx >= len(homewood_data):
+        closest_date_idx = len(homewood_data) - 1
+    closest_data_sample = homewood_data[closest_date_idx]
+
+    # Get [depth, temperature] tuple from homewood data
+    homewood_depth = 2.0
+    homewood_temperature = float(closest_data_sample['LS_Temp_Avg'])
+    ctd_profile.append((homewood_depth, homewood_temperature))
+
+    ####################### Temperature Chain ##########################
+
+    # Actual measurements of the temperature chain
+    tc_dimensions = {
+        "P1": 2.5,
+        "C1": 2.5,
+        "L16": 2.5,
+        "L15": 7.5,
+        "L14": 12.5,
+        "L13": 17.5,
+        "L12": 27.5,
+        "L11": 37.5,
+        "L10": 47.5,
+        "L9": 57.5,
+        "L8": 67.5,
+        "L7": 72.5,
+        "L6": 77.5,
+        "L5": 82.5,
+        "L4": 87.5,
+        "L3": 92.5,
+        "L2": 97.5,
+        "L1": 102.5,
+        "C2": 5
+    }
+
+    # ID #"s of the sensors on the TC
+    tc_sensor_ids = list(range(1, 17))
+
+    def get_depth(tc_depth, tc_sensor_id):
+        # Returns the depth of a particular sensor
+        # Arguments:
+        #  tc_depth: the depth of the temperature chain
+        #  tc_sensor_id: an Integer in [1, 16], the ID of the temperature sensor
+        return tc_depth - tc_dimensions["P1"] - tc_dimensions[f'L{tc_sensor_id}']
+
+    # Retrieve data from temperature chain
+    tc_data = get_endpoint_json(ENDPOINTS['TEMPERATURE_CHAIN'], 0, date)
+
+    # Pick closest date within given data
+    data_dates = [parse_date(d["TmStamp"]) for d in tc_data]
+    closest_date_idx = bisect_left(data_dates, date)
+    if closest_date_idx >= len(tc_data):
+        closest_date_idx = len(tc_data) - 1
+    closest_data_sample = tc_data[closest_date_idx]
+
+    # Extract [depth, temperature] tuples from data
+    tc_depth = float(closest_data_sample["Depth_m4C_Avg"])
+    for sensor_id in tc_sensor_ids:
+        depth = get_depth(tc_depth, sensor_id)
+        temperature = float(closest_data_sample[f"LS_T{sensor_id}_Avg"])
+
+        ctd_profile.append((depth, temperature))
+
+    return ctd_profile
 
 """
 1. Retrieves Lake Tahoe data from AWS

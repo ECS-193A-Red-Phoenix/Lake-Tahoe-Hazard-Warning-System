@@ -7,11 +7,12 @@ Running this script will regularly perform this sequence of tasks
 4. Generate output images
 """
 
+import profile
 from dataretrieval.service import DataRetrievalService
 from model.run_model import run_si3d
 from model.create_output_binary import create_output_binary
 from model.update_si3d_inp import update_si3d_inp
-from model.update_si3d_init import create_ctd_profile_from_node
+from model.update_si3d_init import create_ctd_profile_from_node, create_ctd_profile_from_api
 from save_model_output import save_model_output
 import logging
 import datetime
@@ -49,9 +50,14 @@ def run_si3d_workflow():
         # Update si3d_inp.txt
         update_si3d_inp(model_start_date)
 
-        # Update si3d_init.txt using node 65, 135
-        tf_path = f"{MODEL_DIR}tf65_135.txt"
-        create_ctd_profile_from_node(tf_path, MODEL_DIR, profile_date=model_start_date)
+        try:
+            create_ctd_profile_from_api(MODEL_DIR, profile_date=model_start_date)
+        except:
+            # Update si3d_init.txt using node 65, 135
+            tf_path = f"{MODEL_DIR}tf65_135.txt"
+            logging.warning(f"Failed to create ctd profile from API, attempting to create one from {tf_path}")
+
+            create_ctd_profile_from_node(tf_path, MODEL_DIR, profile_date=model_start_date)
 
         # Run si3d model
         run_si3d()
