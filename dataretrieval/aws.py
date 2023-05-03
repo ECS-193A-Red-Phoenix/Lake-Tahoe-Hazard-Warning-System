@@ -82,6 +82,8 @@ def get_model_ctd_profile(date):
     # Get [depth, temperature] tuple from homewood data
     homewood_depth = 2.0
     homewood_temperature = float(closest_data_sample['LS_Temp_Avg'])
+
+
     ctd_profile.append((homewood_depth, homewood_temperature))
 
     ####################### Temperature Chain ##########################
@@ -136,6 +138,9 @@ def get_model_ctd_profile(date):
         temperature = float(closest_data_sample[f"LS_T{sensor_id}_Avg"])
 
         ctd_profile.append((depth, temperature))
+
+    if np.isnan(ctd_profile[0,1])
+        ctd_profile[0,1] = ctd_profile[1,1]
 
     return ctd_profile
 
