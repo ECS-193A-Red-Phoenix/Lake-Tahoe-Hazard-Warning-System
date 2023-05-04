@@ -68,7 +68,7 @@ def get_model_ctd_profile(date):
     ctd_profile = []
     
     # Retrieve data from homewood station
-    homewood_data = get_endpoint_json(ENDPOINTS['NEARSHORE'], 4, date)
+    homewood_data = get_endpoint_json(ENDPOINTS['NEARSHORE'], 9, date)
 
     # Pick closest date within given data
     parse_date = lambda date: datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S") \
@@ -138,9 +138,6 @@ def get_model_ctd_profile(date):
         temperature = float(closest_data_sample[f"LS_T{sensor_id}_Avg"])
 
         ctd_profile.append((depth, temperature))
-
-    if np.isnan(ctd_profile[0,1])
-        ctd_profile[0,1] = ctd_profile[1,1]
 
     return ctd_profile
 
